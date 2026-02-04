@@ -1,0 +1,6 @@
+@CandyGrabberApi_HostAddress = http://localhost:5283
+
+GET {{CandyGrabberApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
