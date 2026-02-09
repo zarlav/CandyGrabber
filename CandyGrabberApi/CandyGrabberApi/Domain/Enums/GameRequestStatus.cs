@@ -1,10 +1,10 @@
 ﻿namespace CandyGrabberApi.Domain.Enums
 {
-    public enum FriendRequestStatus
+    public enum GameRequestStatus
     {
         NONE,
-        ACCEPTED,
         SENT,
+        ACCEPTED,
         DECLINED
     }
 }
