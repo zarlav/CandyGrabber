@@ -1,6 +1,6 @@
 ﻿namespace CandyGrabberApi.Domain.Enums
 {
-    public enum FriendRequestStatus
+    public enum GameStatus
     {
     }
 }
