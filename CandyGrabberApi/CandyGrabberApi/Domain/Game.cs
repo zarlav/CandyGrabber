@@ -86,7 +86,6 @@ namespace CandyGrabberApi.Domain
                 Status = GameStatus.InProgress;
             }
         }
-
         public void WaitForReconnect()
         {
             lock (_state)

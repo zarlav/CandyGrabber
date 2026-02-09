@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CandyGrabberApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ccb380fc29f947ebfe1a92d0c4aa711ab9032aaa")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+70c91ae66af4a9cf41f6e20915e6d12f07bf1ad6")]
 [assembly: System.Reflection.AssemblyProductAttribute("CandyGrabberApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CandyGrabberApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

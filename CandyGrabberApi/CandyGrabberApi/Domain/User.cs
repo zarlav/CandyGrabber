@@ -10,9 +10,7 @@ namespace CandyGrabberApi.Domain
         public string Name { get; private set; }
         public string LastName { get; private set; }
         public string Username { get; private set; }
-
         public string PasswordHash { get; private set; }
-
         public int GamesWon { get; private set; }
         public int GamesLost { get; private set; }
 
@@ -22,8 +20,8 @@ namespace CandyGrabberApi.Domain
         public ICollection<ChatMessage> SentMessages { get; } = new List<ChatMessage>();
         public ICollection<ChatMessage> ReceivedMessages { get; } = new List<ChatMessage>();
 
-        public ICollection<Request> SentRequests { get; } = new List<Request>();
-        public ICollection<Request> ReceivedRequests { get; } = new List<Request>();
+        public ICollection<GameRequest> SentRequests { get; } = new List<GameRequest>();
+        public ICollection<GameRequest> ReceivedRequests { get; } = new List<GameRequest>();
 
         protected User() { }
 
@@ -83,13 +81,13 @@ namespace CandyGrabberApi.Domain
             ReceivedMessages.Add(message);
         }
 
-        public void AddSentRequest(Request request)
+        public void AddSentRequest(GameRequest request)
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
             SentRequests.Add(request);
         }
 
-        public void AddReceivedRequest(Request request)
+        public void AddReceivedRequest(GameRequest request)
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
             ReceivedRequests.Add(request);
