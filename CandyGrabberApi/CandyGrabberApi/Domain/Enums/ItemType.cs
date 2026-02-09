@@ -2,5 +2,7 @@
 {
     public enum ItemType
     {
+        CANDY,
+        POWER_UP
     }
 }
