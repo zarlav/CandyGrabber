@@ -2,7 +2,7 @@
 
 namespace CandyGrabberApi.Repository.IRepository
 {
-    public interface IPlayerItemRepository
+    public interface IPlayerItemRepository : IRepository<PlayerItem>
     {
         Task<PlayerItem?> GetByIdAsync(int id);
         Task<IEnumerable<PlayerItem>> GetByPlayerIdAsync(int playerId);
