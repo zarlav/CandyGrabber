@@ -1,16 +1,15 @@
 ﻿using CandyGrabberApi.Domain;
 using CandyGrabberApi.Repository.IRepository;
-using CandyGrabberApi.CandyGrabberDbContext;
 using Microsoft.EntityFrameworkCore;
 using CandyGrabberApi.DataContext;
 
 namespace CandyGrabberApi.Repository
 {
-    public class PlayerRepository : IPlayerRepository
+    public class PlayerRepository :Repository<Player>, IPlayerRepository
     {
         private readonly CandyGrabberContext _db;
 
-        public PlayerRepository(CandyGrabberContext db)
+        public PlayerRepository(CandyGrabberContext db) : base(db)
         {
             _db = db;
         }

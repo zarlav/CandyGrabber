@@ -15,14 +15,11 @@ namespace CandyGrabberApi.Domain
         public int GameId { get;protected set; }
         public DateTime TimeStamp { get; set; }
         public GameRequestStatus GameRequestStatus { get; set; }
-        public GameRequest(User _Sender, User _Recipient, Game _Game, DateTime _TimeStamp)
+        public GameRequest(int senderId, int recipientId, int gameId, DateTime _TimeStamp)
         {
-            Sender = _Sender ?? throw new ArgumentNullException(nameof(_Sender));
-            Recipient = _Recipient ?? throw new ArgumentNullException(nameof(_Recipient));
-            Game = _Game ?? throw new ArgumentNullException(nameof(_Game));
-            SenderId = Sender.Id;
-            RecipientId = Recipient.Id;
-            GameId = Game.Id;
+            SenderId = senderId;
+            RecipientId = recipientId;
+            GameId = gameId;
             TimeStamp = _TimeStamp;
             GameRequestStatus = GameRequestStatus.NONE;
         }

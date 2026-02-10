@@ -2,13 +2,6 @@
 {
     public class PlayerDTO
     {
-<<<<<<< Updated upstream
-        public int Id { get; set; }
-        public int UserId { get; set; }
-        public string? Username { get; set; }
-        public int GameId { get; set; }
-        public int Points { get; set; }
-=======
         public int UserId { get; init; }
         public string Username { get; init; } = null!;
         public int GameId { get; init; }
@@ -21,7 +14,5 @@
             GameId = gameId;
             IsHost = isHost;
         }
-
->>>>>>> Stashed changes
     }
 }

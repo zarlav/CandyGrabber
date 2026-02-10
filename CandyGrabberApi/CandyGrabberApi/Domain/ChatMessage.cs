@@ -11,12 +11,10 @@
         public string Content { get; private set; }
         public DateTime TimeStamp { get; private set; }
 
-        public ChatMessage(User _Sender, User _Recipient,string _Content)
+        public ChatMessage(int senderId,int recipientId, string _Content)
         {
-            Sender = _Sender ?? throw new ArgumentNullException(nameof(_Sender));
-            Recipient = _Recipient ?? throw new ArgumentNullException(nameof(_Recipient));
-            SenderId = Sender.Id;
-            RecipientId = Recipient.Id;
+            SenderId = senderId;
+            RecipientId = recipientId;
             Content = _Content;
             TimeStamp = DateTime.UtcNow;
         }

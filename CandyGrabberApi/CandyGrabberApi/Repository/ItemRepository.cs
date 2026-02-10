@@ -1,16 +1,16 @@
-﻿using CandyGrabberApi.Domain;
+﻿using CandyGrabberApi.DataContext;
+using CandyGrabberApi.Domain;
 using CandyGrabberApi.Domain.Enums;
 using CandyGrabberApi.Repository.IRepository;
-using CandyGrabberApi.CandyGrabberDbContext;
 using Microsoft.EntityFrameworkCore;
 
 namespace CandyGrabberApi.Repository
 {
-    public class ItemRepository : IItemRepository
+    public class ItemRepository :Repository<ItemRepository>, IItemRepository
     {
-        private readonly CandyGrabberContext _db;
+        private CandyGrabberContext _db;
 
-        public ItemRepository(CandyGrabberContext db)
+        public ItemRepository(CandyGrabberContext db) : base(db)
         {
             _db = db;
         }

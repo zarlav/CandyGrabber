@@ -5,10 +5,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CandyGrabberApi.Repository
 {
-    public class RequestRepository : Repository<FriendRequest>, IFriendRequestRepository
+    public class FriendRequestRepository : Repository<FriendRequest>, IFriendRequestRepository
     {
         private CandyGrabberContext _db;
-        public RequestRepository(CandyGrabberContext db) : base(db)
+        public FriendRequestRepository(CandyGrabberContext db) : base(db)
         {
             this._db = db;
         }

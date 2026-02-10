@@ -6,11 +6,11 @@ using CandyGrabberApi.DataContext;
 
 namespace CandyGrabberApi.Repository
 {
-    public class PowerUpRepository : IPowerUpRepository
+    public class PowerUpRepository : Repository<PowerUp>,IPowerUpRepository
     {
-        private readonly CandyGrabberContext _db;
+        private CandyGrabberContext _db;
 
-        public PowerUpRepository(CandyGrabberContext db)
+        public PowerUpRepository(CandyGrabberContext db) : base(db)
         {
             _db = db;
         }
