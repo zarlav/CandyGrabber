@@ -25,12 +25,6 @@ namespace CandyGrabberApi.Services
             return await _gameItemRepository.GetByIdAsync(id);
         }
 
-        public async Task<GameItem?> GetItemAtPositionAsync(int gameId, int x, int y)
-        {
-            var activeItems = await _gameItemRepository.GetActiveItemsByGameIdAsync(gameId);
-            return activeItems.FirstOrDefault(gi => gi.X == x && gi.Y == y);
-        }
-
         public async Task<bool> MarkItemAsCollectedAsync(int gameItemId)
         {
             var gameItem = await _gameItemRepository.GetByIdAsync(gameItemId);
@@ -45,20 +39,11 @@ namespace CandyGrabberApi.Services
         public async Task SpawnItemsForGameAsync(int gameId)
         {
             var allDefinitions = await _itemRepository.GetAllAsync();
-            var random = new Random();
-
             foreach (var definition in allDefinitions)
             {
-                var gameItem = new GameItem(
-                    gameId,
-                    definition.Id,
-                    random.Next(0, 100),
-                    random.Next(0, 100)
-                );
-
+                var gameItem = new GameItem(gameId, definition.Id);
                 await _gameItemRepository.AddAsync(gameItem);
             }
-
             await _gameItemRepository.SaveAsync();
         }
     }

@@ -8,6 +8,5 @@ namespace CandyGrabberApi.Services.IServices
         Task<GameItem?> GetGameItemByIdAsync(int id);
         Task SpawnItemsForGameAsync(int gameId); 
         Task<bool> MarkItemAsCollectedAsync(int gameItemId);
-        Task<GameItem?> GetItemAtPositionAsync(int gameId, int x, int y);
     }
 }
