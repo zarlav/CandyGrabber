@@ -33,44 +33,22 @@ namespace CandyGrabberApi.Services
             return await _playerRepository.GetPlayersByGameIdAsync(gameId);
         }
 
-        public async Task<bool> MovePlayerAsync(int playerId, int newX, int newY)
-        {
-            var player = await _playerRepository.GetByIdAsync(playerId);
-            if (player == null) return false;
-
-            player.UpdatePosition(newX, newY);
-
-            var itemAtPos = await _gameItemService.GetItemAtPositionAsync(player.Game.Id, newX, newY);
-            if (itemAtPos != null)
-            {
-                await CollectItemAsync(playerId, itemAtPos.Id);
-            }
-
-            _playerRepository.Update(player);
-            await _playerRepository.SaveAsync();
-            return true;
-        }
-
         public async Task<bool> CollectItemAsync(int playerId, int gameItemId)
         {
             var player = await _playerRepository.GetByIdAsync(playerId);
             var gameItem = await _gameItemService.GetGameItemByIdAsync(gameItemId);
 
-            if (player == null || gameItem == null || gameItem.IsCollected) return false;
+            if (player == null || gameItem == null || gameItem.IsCollected)
+                return false;
 
             var success = await _gameItemService.MarkItemAsCollectedAsync(gameItemId);
             if (!success) return false;
 
-            player.AddToInventory(gameItem.Item);
-
-            var candyData = await _candyRepository.GetByItemIdAsync(gameItem.ItemId);
-            if (candyData != null)
-            {
-                player.AddPoints(candyData.Points);
-            }
+            player.AddToInventory(gameItem.Item, 1);
 
             _playerRepository.Update(player);
             await _playerRepository.SaveAsync();
+
             return true;
         }
 
