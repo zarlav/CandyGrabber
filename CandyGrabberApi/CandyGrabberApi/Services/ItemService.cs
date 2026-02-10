@@ -4,64 +4,40 @@ using CandyGrabberApi.Services.IServices;
 
 namespace CandyGrabberApi.Services
 {
-    public class GameService : IGameService
+    public class ItemService : IItemService
     {
-        private readonly IGameRepository _gameRepository;
-        private readonly IPlayerRepository _playerRepository;
-        private readonly IGameItemService _gameItemService;
+        private readonly IItemRepository _itemRepository;
+        private readonly ICandyRepository _candyRepository;
+        private readonly IPowerUpRepository _powerUpRepository;
 
-        public GameService(
-            IGameRepository gameRepository,
-            IPlayerRepository playerRepository,
-            IGameItemService gameItemService)
+        public ItemService(
+            IItemRepository itemRepository,
+            ICandyRepository candyRepository,
+            IPowerUpRepository powerUpRepository)
         {
-            _gameRepository = gameRepository;
-            _playerRepository = playerRepository;
-            _gameItemService = gameItemService;
+            _itemRepository = itemRepository;
+            _candyRepository = candyRepository;
+            _powerUpRepository = powerUpRepository;
         }
 
-        public async Task<Game?> CreateGameAsync(string gameName, int maxPlayers)
+        public async Task<IEnumerable<Item>> GetAllItemsAsync()
         {
-            var game = new Game(gameName, maxPlayers);
-            await _gameRepository.AddAsync(game);
-            await _gameRepository.SaveAsync();
-            return game;
+            return await _itemRepository.GetAllAsync();
         }
 
-        public async Task<bool> StartGameAsync(int gameId)
+        public async Task<Item?> GetItemDetailsAsync(int itemId)
         {
-            var game = await _gameRepository.GetByIdAsync(gameId);
-            if (game == null) return false;
-
-            game.Start();
-            await _gameItemService.SpawnItemsForGameAsync(gameId);
-
-            _gameRepository.Update(game);
-            await _gameRepository.SaveAsync();
-            return true;
+            return await _itemRepository.GetByIdAsync(itemId);
         }
 
-        public async Task<bool> EndGameAsync(int gameId)
+        public async Task<Candy?> GetCandyDetailsAsync(int itemId)
         {
-            var game = await _gameRepository.GetByIdAsync(gameId);
-            if (game == null) return false;
-
-            game.End();
-            _gameRepository.Update(game);
-            await _gameRepository.SaveAsync();
-            return true;
+            return await _candyRepository.GetByItemIdAsync(itemId);
         }
 
-        public async Task<IEnumerable<Game>> GetActiveGamesAsync()
-        {
-            var games = await _gameRepository.GetAllAsync();
-            return games.Where(g => g.Status == "Active");
-        }
-
-        public async Task<Player?> GetWinnerAsync(int gameId)
-        {
-            var players = await _playerRepository.GetPlayersByGameIdAsync(gameId);
-            return players.OrderByDescending(p => p.Points).FirstOrDefault();
+        public async Task<PowerUp?> GetPowerUpDetailsAsync(int itemId)
+        { 
+            return await _powerUpRepository.GetByItemIdAsync(itemId);
         }
     }
 }

@@ -3,7 +3,7 @@ using CandyGrabberApi.Domain.Enums;
 
 namespace CandyGrabberApi.Repository.IRepository
 {
-    public interface IItemRepository : IRepository<Item>
+    public interface IItemRepository
     {
         Task<Item?> GetByIdAsync(int id);
         Task<IEnumerable<Item>> GetAllAsync();

@@ -28,9 +28,10 @@ namespace CandyGrabberApi.Services
         public async Task<bool> MarkItemAsCollectedAsync(int gameItemId)
         {
             var gameItem = await _gameItemRepository.GetByIdAsync(gameItemId);
+
             if (gameItem == null || gameItem.IsCollected) return false;
 
-            gameItem.Collect();
+            gameItem.Collect(); 
             _gameItemRepository.Update(gameItem);
             await _gameItemRepository.SaveAsync();
             return true;
@@ -39,9 +40,16 @@ namespace CandyGrabberApi.Services
         public async Task SpawnItemsForGameAsync(int gameId)
         {
             var allDefinitions = await _itemRepository.GetAllAsync();
+
             foreach (var definition in allDefinitions)
             {
-                var gameItem = new GameItem(gameId, definition.Id);
+                var gameItem = new GameItem
+                {
+                    GameId = gameId,
+                    Item = definition,
+                    SpawnTime = DateTime.UtcNow
+                };
+
                 await _gameItemRepository.AddAsync(gameItem);
             }
             await _gameItemRepository.SaveAsync();

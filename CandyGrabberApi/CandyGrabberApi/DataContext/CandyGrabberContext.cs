@@ -46,15 +46,10 @@ namespace CandyGrabberApi.DataContext
 
             modelBuilder.Entity<Player>(entity => {
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.X).HasDefaultValue(0);
-                entity.Property(e => e.Y).HasDefaultValue(0);
-                entity.Property(e => e.Points).HasDefaultValue(0);
             });
 
             modelBuilder.Entity<GameItem>(entity => {
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.X).IsRequired();
-                entity.Property(e => e.Y).IsRequired();
             });
 
             modelBuilder.Entity<PlayerItem>(entity => {

@@ -2,7 +2,7 @@
 
 namespace CandyGrabberApi.Repository.IRepository
 {
-    public interface IGameItemRepository : IRepository<GameItem>
+    public interface IGameItemRepository
     {
         Task<GameItem?> GetByIdAsync(int id);
         Task<IEnumerable<GameItem>> GetItemsByGameIdAsync(int gameId);

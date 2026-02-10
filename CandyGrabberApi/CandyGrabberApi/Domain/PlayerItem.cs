@@ -8,6 +8,12 @@
         public int Quantity { get; set; }
         public bool IsActive { get; set; }
         public DateTime AcquiredAt { get; set; }
+
         public PlayerItem() { }
+
+        public void Activate()
+        {
+            IsActive = true;
+        }
     }
 }
