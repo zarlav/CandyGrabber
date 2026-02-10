@@ -2,7 +2,7 @@
 
 namespace CandyGrabberApi.Repository.IRepository
 {
-    public interface IGameRepository : IRepository<Game>
+    public interface IWinnerRepository : IRepository<Winner>
     {
     }
 }

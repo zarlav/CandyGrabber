@@ -1,0 +1,73 @@
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\bin\Debug\net8.0\appsettings.Development.json
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\bin\Debug\net8.0\appsettings.json
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\bin\Debug\net8.0\CandyGrabberApi.staticwebassets.endpoints.json
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\bin\Debug\net8.0\CandyGrabberApi.exe
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\bin\Debug\net8.0\CandyGrabberApi.deps.json
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\bin\Debug\net8.0\CandyGrabberApi.runtimeconfig.json
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\bin\Debug\net8.0\CandyGrabberApi.dll
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\bin\Debug\net8.0\CandyGrabberApi.pdb
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\bin\Debug\net8.0\Microsoft.OpenApi.dll
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\bin\Debug\net8.0\Swashbuckle.AspNetCore.Swagger.dll
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\CandyGrabberApi.csproj.AssemblyReference.cache
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\rpswa.dswa.cache.json
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\CandyGrabberApi.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\CandyGrabberApi.AssemblyInfoInputs.cache
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\CandyGrabberApi.AssemblyInfo.cs
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\CandyGrabberApi.csproj.CoreCompileInputs.cache
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\CandyGrabberApi.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\CandyGrabberApi.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\CandyGrabberApi.sourcelink.json
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\rjimswa.dswa.cache.json
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\rjsmrazor.dswa.cache.json
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\rjsmcshtml.dswa.cache.json
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\scopedcss\bundle\CandyGrabberApi.styles.css
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\staticwebassets.build.json
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\staticwebassets.build.json.cache
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\staticwebassets.development.json
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\staticwebassets.build.endpoints.json
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\CandyGra.D814BA40.Up2Date
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\CandyGrabberApi.dll
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\refint\CandyGrabberApi.dll
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\CandyGrabberApi.pdb
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\CandyGrabberApi.genruntimeconfig.cache
+C:\Users\Lazar\Documents\AIPsCandyGrabber\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\ref\CandyGrabberApi.dll
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\CandyGrabberApi.csproj.AssemblyReference.cache
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\CandyGrabberApi.GeneratedMSBuildEditorConfig.editorconfig
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\CandyGrabberApi.AssemblyInfoInputs.cache
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\CandyGrabberApi.AssemblyInfo.cs
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\CandyGrabberApi.csproj.CoreCompileInputs.cache
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\CandyGrabberApi.MvcApplicationPartsAssemblyInfo.cs
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\CandyGrabberApi.MvcApplicationPartsAssemblyInfo.cache
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\CandyGrabberApi.sourcelink.json
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\CandyGrabberApi.dll
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\refint\CandyGrabberApi.dll
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\CandyGrabberApi.pdb
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\bin\Debug\net8.0\appsettings.Development.json
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\bin\Debug\net8.0\appsettings.json
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\bin\Debug\net8.0\CandyGrabberApi.staticwebassets.endpoints.json
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\bin\Debug\net8.0\CandyGrabberApi.exe
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\bin\Debug\net8.0\CandyGrabberApi.deps.json
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\bin\Debug\net8.0\CandyGrabberApi.runtimeconfig.json
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\bin\Debug\net8.0\CandyGrabberApi.dll
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\bin\Debug\net8.0\CandyGrabberApi.pdb
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\bin\Debug\net8.0\Microsoft.OpenApi.dll
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\bin\Debug\net8.0\Swashbuckle.AspNetCore.Swagger.dll
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\scopedcss\bundle\CandyGrabberApi.styles.css
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\staticwebassets.build.json
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\staticwebassets.development.json
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\staticwebassets.build.endpoints.json
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\staticwebassets\msbuild.CandyGrabberApi.Microsoft.AspNetCore.StaticWebAssets.props
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\staticwebassets\msbuild.CandyGrabberApi.Microsoft.AspNetCore.StaticWebAssetEndpoints.props
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\staticwebassets\msbuild.build.CandyGrabberApi.props
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\staticwebassets\msbuild.buildMultiTargeting.CandyGrabberApi.props
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.CandyGrabberApi.props
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\staticwebassets.pack.json
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\CandyGra.D814BA40.Up2Date
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\CandyGrabberApi.genruntimeconfig.cache
+D:\Cetvrta godina\AIPS\Projekat\CandyGrabber\CandyGrabberApi\CandyGrabberApi\obj\Debug\net8.0\ref\CandyGrabberApi.dll
