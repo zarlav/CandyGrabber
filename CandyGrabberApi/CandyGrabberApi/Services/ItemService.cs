@@ -1,6 +1,7 @@
 ﻿using CandyGrabberApi.Domain;
 using CandyGrabberApi.Repository.IRepository;
 using CandyGrabberApi.Services.IServices;
+using Microsoft.EntityFrameworkCore;
 
 namespace CandyGrabberApi.Services
 {
@@ -22,12 +23,20 @@ namespace CandyGrabberApi.Services
 
         public async Task<IEnumerable<Item>> GetAllItemsAsync()
         {
-            return await _itemRepository.GetAllAsync();
+            var query = await _itemRepository.GetAll();
+            return await query.ToListAsync();
         }
 
         public async Task<Item?> GetItemDetailsAsync(int itemId)
         {
-            return await _itemRepository.GetByIdAsync(itemId);
+            try
+            {
+                return await _itemRepository.GetOne(itemId);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         public async Task<Candy?> GetCandyDetailsAsync(int itemId)
@@ -36,7 +45,7 @@ namespace CandyGrabberApi.Services
         }
 
         public async Task<PowerUp?> GetPowerUpDetailsAsync(int itemId)
-        { 
+        {
             return await _powerUpRepository.GetByItemIdAsync(itemId);
         }
     }
