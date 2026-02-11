@@ -23,8 +23,7 @@ namespace CandyGrabberApi.Services
 
         public async Task<IEnumerable<Item>> GetAllItemsAsync()
         {
-            var query = await _itemRepository.GetAllAsync();
-            return await query.ToList();
+            return await _itemRepository.GetAllAsync();
         }
 
         public async Task<Item?> GetItemDetailsAsync(int itemId)
