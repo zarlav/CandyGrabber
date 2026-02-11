@@ -7,12 +7,13 @@ namespace CandyGrabberApi.Domain
     {
         public int Id { get; private set; }
 
-        public string Name { get; private set; }
-        public string LastName { get; private set; }
-        public string Username { get; private set; }
-        public string PasswordHash { get; private set; }
-        public int GamesWon { get; private set; }
-        public int GamesLost { get; private set; }
+        public string Name { get;  set; }
+        public string LastName { get;  set; }
+        public string Username { get;  set; }
+        [JsonIgnore]
+        public string PasswordHash { get;  set; }
+        public int GamesWon { get;  set; }
+        public int GamesLost { get;  set; }
 
         public ICollection<FriendsList> SentFriendships { get; } = new List<FriendsList>();
         public ICollection<FriendsList> ReceivedFriendships { get; } = new List<FriendsList>();
@@ -28,9 +29,9 @@ namespace CandyGrabberApi.Domain
         public User(string name, string lastName, string username, string passwordHash)
         {
             Name = string.IsNullOrEmpty(name) ? throw new ArgumentException("Ime ne moze biti prazno") : name;
-            LastName = string.IsNullOrEmpty(LastName) ? throw new ArgumentException("Prezime ne moze biti prazno") : LastName;
-            Username = string.IsNullOrEmpty(Username) ? throw new ArgumentException("Korisnicko ime ne moze biti prazno") : Username;
-            PasswordHash = string.IsNullOrEmpty(PasswordHash) ? throw new ArgumentException("Sifra ne moze biti prazna") : PasswordHash;
+            LastName = string.IsNullOrEmpty(lastName) ? throw new ArgumentException("Prezime ne moze biti prazno") : lastName;
+            Username = string.IsNullOrEmpty(username) ? throw new ArgumentException("Korisnicko ime ne moze biti prazno") : username;
+            PasswordHash = string.IsNullOrEmpty(passwordHash) ? throw new ArgumentException("Sifra ne moze biti prazna") : passwordHash;
         }
 
         public void ChangeName(string newName)

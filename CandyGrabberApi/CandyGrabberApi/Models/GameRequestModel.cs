@@ -1,4 +1,5 @@
 ﻿using CandyGrabberApi.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace CandyGrabberApi.Models
 {
@@ -9,8 +10,15 @@ namespace CandyGrabberApi.Models
         public int SenderId { get; set; }
         public UserModel? Recipient { get; set; }
         public int RecipientId { get; set; }
-        public UserModel? Game { get; set; }
+        public GameModel? Game { get; set; }
         public int GameId { get; set; }
         public DateTime TimeStamp { get; set; }
+        public GameRequestModel(int senderId, int recipientId, int gameId, DateTime timestamp)
+        {
+            SenderId = senderId;
+            RecipientId = recipientId;
+            GameId = gameId;
+            TimeStamp = timestamp;
+        }
     }
 }

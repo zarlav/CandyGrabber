@@ -1,5 +1,4 @@
-﻿using CandyGrabberApi.DataContext;
-using CandyGrabberApi.Domain;
+﻿using CandyGrabberApi.Domain;
 using CandyGrabberApi.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,7 +15,7 @@ namespace CandyGrabberApi.Repository
 
         public async Task<Candy?> GetByItemIdAsync(int itemId)
         {
-            return await _candyContext.Candies.FirstOrDefaultAsync(c => c.ItemId == itemId);
+            return await _candyContext.Candy.FirstOrDefaultAsync(c => c.ItemId == itemId);
         }
     }
 }

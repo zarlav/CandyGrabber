@@ -1,7 +1,6 @@
 ﻿using CandyGrabberApi.Domain;
 using CandyGrabberApi.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
-using CandyGrabberApi.DataContext;
 
 namespace CandyGrabberApi.Repository
 {
@@ -16,7 +15,7 @@ namespace CandyGrabberApi.Repository
 
         public async Task<PowerUp?> GetByItemIdAsync(int itemId)
         {
-            return await _db.PowerUps
+            return await _db.PowerUp
                 .FirstOrDefaultAsync(p => p.ItemId == itemId);
         }
     }

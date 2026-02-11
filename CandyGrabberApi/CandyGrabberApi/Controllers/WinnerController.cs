@@ -1,5 +1,4 @@
-﻿using CandyGrabberApi.DataContext;
-using CandyGrabberApi.Repository.IRepository;
+﻿using CandyGrabberApi.Repository.IRepository;
 using CandyGrabberApi.Services.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

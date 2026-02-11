@@ -1,5 +1,4 @@
-﻿using CandyGrabberApi.DataContext;
-using CandyGrabberApi.DTOs.UserDTO;
+﻿using CandyGrabberApi.DTOs.UserDTO;
 using CandyGrabberApi.Services.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -44,7 +43,7 @@ namespace CandyGrabberApi.Controllers
             {
                 var result = await this._userService.Login(user.Username, user.Password);
 
-                Response.Cookies.Append("jwt", result, new CookieOptions { HttpOnly = false, Secure = true, SameSite = SameSiteMode.None });
+                Response.Cookies.Append("jwt", result, new CookieOptions { HttpOnly = false, Secure = false, SameSite = SameSiteMode.None });
 
 
                 return Ok(new { message = "success" });
@@ -70,19 +69,19 @@ namespace CandyGrabberApi.Controllers
         }
 
         [AllowAnonymous]
-        [Route("GetUser")]
-        [HttpGet]
+        [HttpGet("GetUser")]
         public async Task<IActionResult> GetUser()
         {
+            var jwt = Request.Cookies["jwt"];
+            if (string.IsNullOrEmpty(jwt))
+                return Ok(null); 
+
             try
             {
-                var jwt = Request.Cookies["jwt"];
-
-                var user = await this._userService.GetUser(jwt);
-
+                var user = await _userService.GetUser(jwt);
                 return Ok(user);
             }
-            catch (Exception e)
+            catch
             {
                 return Unauthorized();
             }
@@ -96,7 +95,7 @@ namespace CandyGrabberApi.Controllers
 
             return Ok(new { message = "success" });
         }
-
+        [AllowAnonymous]
         [Route("Search/{username}/{ownerUsername}")]
         [HttpGet]
         public async Task<IActionResult> Search(string username, string ownerUsername)
@@ -112,6 +111,7 @@ namespace CandyGrabberApi.Controllers
                 return BadRequest(e.Message);
             }
         }
+        [AllowAnonymous]
         [Route("GetUserByUsername/{username}")]
         [HttpGet]
         public async Task<IActionResult> GetUserByUsername(string username)

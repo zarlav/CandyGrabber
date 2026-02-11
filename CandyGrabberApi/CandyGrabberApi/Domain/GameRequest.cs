@@ -7,20 +7,20 @@ namespace CandyGrabberApi.Domain
     {
         private readonly object _state = new();
         public int Id { get; protected set; }
-        public User Sender { get; protected set; }
-        public int SenderId { get;protected set; }
-        public User Recipient { get;protected set; }
-        public int RecipientId { get;protected set; }
-        public Game Game { get;protected set; }
-        public int GameId { get;protected set; }
+        public User Sender { get;  set; }
+        public int SenderId { get; set; }
+        public User Recipient { get; set; }
+        public int RecipientId { get; set; }
+        public Game Game { get; set; }
+        public int GameId { get; set; }
         public DateTime TimeStamp { get; set; }
         public GameRequestStatus GameRequestStatus { get; set; }
-        public GameRequest(int senderId, int recipientId, int gameId, DateTime _TimeStamp)
+        public GameRequest(int senderId, int recipientId, int gameId, DateTime timeStamp)
         {
             SenderId = senderId;
             RecipientId = recipientId;
             GameId = gameId;
-            TimeStamp = _TimeStamp;
+            TimeStamp = timeStamp;
             GameRequestStatus = GameRequestStatus.NONE;
         }
 

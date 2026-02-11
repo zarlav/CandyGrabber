@@ -1,5 +1,4 @@
-﻿using CandyGrabberApi.DataContext;
-using CandyGrabberApi.Domain;
+﻿using CandyGrabberApi.Domain;
 using CandyGrabberApi.Domain.Enums;
 using CandyGrabberApi.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +16,7 @@ namespace CandyGrabberApi.Repository
 
         public async Task<IEnumerable<Item>> GetByTypeAsync(ItemType type)
         {
-            return await _db.Items
+            return await _db.Item
                 .Where(i => i.Type == type)
                 .ToListAsync();
         }

@@ -6,10 +6,10 @@ namespace CandyGrabberApi.Domain
     {
         private readonly object _state = new();
         public int Id { get; set; }
-        public ICollection<User> Players { get; private set; } = new List<User>();
-        public int Duration { get;private set; }
-        public ICollection<GameItem> GameItems { get; private set; } = new List<GameItem>();
-        public GameStatus Status { get; private set; }
+        public ICollection<Player> Players { get;  set; } = new List<Player>();
+        public int Duration { get; set; }
+        public ICollection<GameItem> GameItems { get;  set; } = new List<GameItem>();
+        public GameStatus Status { get;  set; }
         public ICollection<GameRequest> Invitations { get; set; } = new List<GameRequest>();
         protected Game() { }
         public Game(int duration)
@@ -95,7 +95,7 @@ namespace CandyGrabberApi.Domain
                 Status = GameStatus.WaitingForReconnect;
             }
         }
-        public void AddPlayer(User user)
+        public void AddPlayer(Player user)
         {
             if (Status != GameStatus.Lobby)
                 throw new InvalidOperationException("Igrac se moze dodati samo u lobby stanju.");

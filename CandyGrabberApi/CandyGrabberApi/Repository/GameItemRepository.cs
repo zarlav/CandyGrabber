@@ -1,7 +1,6 @@
 ﻿using CandyGrabberApi.Domain;
 using CandyGrabberApi.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
-using CandyGrabberApi.DataContext;
 
 namespace CandyGrabberApi.Repository
 {
@@ -16,14 +15,14 @@ namespace CandyGrabberApi.Repository
 
         public async Task<GameItem?> GetByIdWithItemAsync(int id)
         {
-            return await _db.GameItems!
+            return await _db.GameItem!
                 .Include(gi => gi.Item)
                 .FirstOrDefaultAsync(gi => gi.Id == id);
         }
 
         public async Task<IEnumerable<GameItem>> GetItemsByGameIdAsync(int gameId)
         {
-            return await _db.GameItems!
+            return await _db.GameItem!
                 .Where(gi => gi.GameId == gameId)
                 .Include(gi => gi.Item)
                 .ToListAsync();
@@ -31,7 +30,7 @@ namespace CandyGrabberApi.Repository
 
         public async Task<IEnumerable<GameItem>> GetActiveItemsByGameIdAsync(int gameId)
         {
-            return await _db.GameItems!
+            return await _db.GameItem!
                 .Where(gi => gi.GameId == gameId && !gi.IsCollected)
                 .Include(gi => gi.Item)
                 .ToListAsync();

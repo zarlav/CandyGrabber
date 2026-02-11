@@ -4,27 +4,28 @@
     {
         private readonly object _lock = new();
         public int Id { get; private set; }
-        public User Sender { get; private set; }
-        public int SenderId { get; private set; }
-        public User Recipient { get;private set; }
-        public int RecipientId { get; private set; }
-        public string Content { get; private set; }
-        public DateTime TimeStamp { get; private set; }
+        public User Sender { get;  set; }
+        public int SenderId { get;  set; }
+        public User Recipient { get; set; }
+        public int RecipientId { get;  set; }
+        public string Content { get;  set; }
+        public DateTime TimeStamp { get;  set; }
 
-        public ChatMessage(int senderId,int recipientId, string _Content)
+        public ChatMessage() { }
+        public ChatMessage(int senderId,int recipientId, string content)
         {
             SenderId = senderId;
             RecipientId = recipientId;
-            Content = _Content;
+            Content = content;
             TimeStamp = DateTime.UtcNow;
         }
-        public void SetContent(string _Content)
+        public void SetContent(string content)
         {
-            if (string.IsNullOrEmpty(_Content))
-                    throw new ArgumentException("Poruka ne moze biti prazna.", nameof(_Content));
+            if (string.IsNullOrEmpty(content))
+                    throw new ArgumentException("Poruka ne moze biti prazna.", nameof(content));
             lock (_lock)
             {
-                Content = _Content;
+                Content = content;
             }          
         }
     }

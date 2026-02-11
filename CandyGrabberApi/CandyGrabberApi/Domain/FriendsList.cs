@@ -3,10 +3,10 @@
     public class FriendsList
     {
         public int Id { get; private set; }
-        public User? User { get; private set; }
-        public int UserId { get; private set; }
-        public User? Friend { get; private set; }
-        public int FriendId { get; private set; }
+        public User? User { get;  set; }
+        public int UserId { get;  set; }
+        public User? Friend { get;  set; }
+        public int FriendId { get;  set; }
         protected FriendsList() { }
         public FriendsList(int userId, int friendId)
         {

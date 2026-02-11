@@ -1,7 +1,10 @@
-﻿namespace CandyGrabberApi.DTOs.UserDTO
+﻿using System.Text.Json.Serialization;
+
+namespace CandyGrabberApi.DTOs.UserDTO
 {
     public class UserUpdateDTO
     {
+        [JsonIgnore]
         public int Id { get; init; }
         public string Username { get; init; }
         public string Name { get; init; }

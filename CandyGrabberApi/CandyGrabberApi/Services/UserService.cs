@@ -21,20 +21,30 @@ public class UserService : IUserService
             if (exists.Any())
                 throw new Exception("User with this username already exists.");
 
-            var user = new User(dto.Name, dto.LastName,dto.Username, dto.Password);
+            var passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+
+            var user = new User(dto.Name, dto.LastName, dto.Username, passwordHash);
+
             await _unitOfWork.User.AddAsync(user);
             await _unitOfWork.Save();
 
             return user;
         }
+
         public async Task<string> Login(string username, string password)
         {
-            var user = (await _unitOfWork.User.FindAsync(u => u.Username == username)).FirstOrDefault();
-            if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+            var user = (await _unitOfWork.User
+                .FindAsync(u => u.Username == username))
+                .FirstOrDefault();
+
+            if (user == null)
+                throw new Exception("Invalid credentials");
+            if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
                 throw new Exception("Invalid credentials");
 
-            return _jwtService.GenerateToken(user.Id, user.Username); 
+            return _jwtService.GenerateToken(user.Id, user.Username);
         }
+
 
         public async Task UpdateProfile(UserUpdateDTO dto)
         {

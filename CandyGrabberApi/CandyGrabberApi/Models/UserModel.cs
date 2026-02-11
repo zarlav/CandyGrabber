@@ -1,4 +1,6 @@
-﻿namespace CandyGrabberApi.Models
+﻿using CandyGrabberApi.Domain;
+
+namespace CandyGrabberApi.Models
 {
     public class UserModel
     {
@@ -9,12 +11,15 @@
         public string PasswordHash { get; set; } = string.Empty;
         public int GamesWon { get; set; }
         public int GamesLost { get; set; }
-        public ICollection<FriendsListModel> SentFriendships { get; set; } = new List<FriendsListModel>();
-        public ICollection<FriendsListModel> ReceivedFriendships { get; set; } = new List<FriendsListModel>();
-        public ICollection<ChatMessageModel> SentMessages { get; set; } = new List<ChatMessageModel>();
-        public ICollection<ChatMessageModel> ReceivedMessages { get; set; } = new List<ChatMessageModel>();
-        public ICollection<GameRequestModel> SentRequests { get; set; } = new List<GameRequestModel>();
-        public ICollection<GameRequestModel> ReceivedRequests { get; set; } = new List<GameRequestModel>();
+        public virtual ICollection<FriendsListModel> FriendFriendsLists { get; set; } = new List<FriendsListModel>();
+
+        public virtual ICollection<FriendsListModel> InitiatorFriendsLists { get; set; } = new List<FriendsListModel>();
+        public ICollection<FriendRequestModel> SenderRequests { get; set; } = new List<FriendRequestModel>();
+        public ICollection<FriendRequestModel> RecipientRequests { get; set; } = new List<FriendRequestModel>();
+        public ICollection<ChatMessageModel> SenderLists { get; set; } = new List<ChatMessageModel>();
+        public ICollection<ChatMessageModel> RecipientLists { get; set; } = new List<ChatMessageModel>();
+        public ICollection<GameRequestModel> SenderGameInvitations { get; set; } = new List<GameRequestModel>();
+        public ICollection<GameRequestModel> RecipientGameInvitations { get; set; } = new List<GameRequestModel>();
 
     }
 }

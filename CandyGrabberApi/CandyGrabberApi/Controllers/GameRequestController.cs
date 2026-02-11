@@ -1,5 +1,4 @@
-﻿using CandyGrabberApi.DataContext;
-using CandyGrabberApi.Domain;
+﻿using CandyGrabberApi.Domain;
 using CandyGrabberApi.DTOs;
 using CandyGrabberApi.Services.IServices;
 using Microsoft.AspNetCore.Authorization;
