@@ -5,16 +5,16 @@ using CandyGrabberApi.DataContext;
 
 namespace CandyGrabberApi.Repository
 {
-    public class GameItemRepository : IGameItemRepository
+    public class GameItemRepository : Repository<GameItem>, IGameItemRepository
     {
         private readonly CandyGrabberContext _db;
 
-        public GameItemRepository(CandyGrabberContext db)
+        public GameItemRepository(CandyGrabberContext db) : base(db)
         {
             _db = db;
         }
 
-        public async Task<GameItem?> GetByIdAsync(int id)
+        public async Task<GameItem?> GetByIdWithItemAsync(int id)
         {
             return await _db.GameItems!
                 .Include(gi => gi.Item)
@@ -35,21 +35,6 @@ namespace CandyGrabberApi.Repository
                 .Where(gi => gi.GameId == gameId && !gi.IsCollected)
                 .Include(gi => gi.Item)
                 .ToListAsync();
-        }
-
-        public async Task AddAsync(GameItem gameItem)
-        {
-            await _db.GameItems!.AddAsync(gameItem);
-        }
-
-        public void Update(GameItem gameItem)
-        {
-            _db.GameItems!.Update(gameItem);
-        }
-
-        public async Task SaveAsync()
-        {
-            await _db.SaveChangesAsync();
         }
     }
 }

@@ -5,7 +5,7 @@ using CandyGrabberApi.DataContext;
 
 namespace CandyGrabberApi.Repository
 {
-    public class PlayerRepository :Repository<Player>, IPlayerRepository
+    public class PlayerRepository : Repository<Player>, IPlayerRepository
     {
         private readonly CandyGrabberContext _db;
 
@@ -14,7 +14,7 @@ namespace CandyGrabberApi.Repository
             _db = db;
         }
 
-        public async Task<Player?> GetByIdAsync(int id)
+        public async Task<Player?> GetByIdWithUserAndGameAsync(int id)
         {
             return await _db.Players!
                 .Include(p => p.User)
@@ -33,29 +33,9 @@ namespace CandyGrabberApi.Repository
         public async Task<IEnumerable<Player>> GetPlayersByGameIdAsync(int gameId)
         {
             return await _db.Players!
-                .Where(p => p.Game.Id == gameId)
+                .Where(p => p.GameId == gameId)
                 .Include(p => p.User)
                 .ToListAsync();
-        }
-
-        public async Task AddAsync(Player player)
-        {
-            await _db.Players!.AddAsync(player);
-        }
-
-        public void Update(Player player)
-        {
-            _db.Players!.Update(player);
-        }
-
-        public void Remove(Player player)
-        {
-            _db.Players!.Remove(player);
-        }
-
-        public async Task SaveAsync()
-        {
-            await _db.SaveChangesAsync();
         }
     }
 }
