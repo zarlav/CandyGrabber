@@ -7,12 +7,12 @@ namespace CandyGrabberApi.Domain
     {
         private readonly object _state = new();
         public int Id { get; protected set; }
-        public int RecipientId { get; protected set; }
-        public User Recipient { get; protected set; } 
-        public int SenderId { get; protected set; }
-        public User Sender { get; protected set; }
+        public int RecipientId { get;  set; }
+        public User Recipient { get;  set; } 
+        public int SenderId { get;  set; }
+        public User Sender { get;  set; }
         public DateTime TimeStamp { get; set; }
-        public FriendRequestStatus Status { get; private set; }
+        public FriendRequestStatus Status { get;  set; }
 
         protected FriendRequest() { }
         public FriendRequest(User _Sender, User _Recipient, DateTime _TimeStamp)
