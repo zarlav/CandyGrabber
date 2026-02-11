@@ -26,7 +26,7 @@ namespace CandyGrabberApi.Services
             if (message != null)
             {
                 var messageCreated = new ChatMessage(message.SenderId, message.RecipientId, message.Content);
-                await _unitOfWork.ChatMessage.Add(messageCreated);
+                await _unitOfWork.ChatMessage.AddAsync(messageCreated);
                 await _unitOfWork.Save();
             }
         }

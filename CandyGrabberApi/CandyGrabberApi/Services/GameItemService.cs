@@ -8,11 +8,14 @@ namespace CandyGrabberApi.Services
     {
         private readonly IGameItemRepository _gameItemRepository;
         private readonly IItemRepository _itemRepository;
+        private readonly IGameRepository _gameRepository;
 
-        public GameItemService(IGameItemRepository gameItemRepository, IItemRepository itemRepository)
+
+        public GameItemService(IGameItemRepository gameItemRepository, IItemRepository itemRepository, IGameRepository gameRepository)
         {
             _gameItemRepository = gameItemRepository;
             _itemRepository = itemRepository;
+            _gameRepository = gameRepository;
         }
 
         public async Task<IEnumerable<GameItem>> GetActiveItemsInGameAsync(int gameId)
@@ -27,7 +30,7 @@ namespace CandyGrabberApi.Services
 
         public async Task<bool> MarkItemAsCollectedAsync(int gameItemId)
         {
-            var gameItem = await _gameItemRepository.GetOne(gameItemId);
+            var gameItem = await _gameItemRepository.GetByIdAsync(gameItemId);
 
             if (gameItem == null || gameItem.IsCollected) return false;
 
@@ -39,20 +42,17 @@ namespace CandyGrabberApi.Services
 
         public async Task SpawnItemsForGameAsync(int gameId)
         {
-            var allDefinitionsQuery = await _itemRepository.GetAll();
-            var allDefinitions = allDefinitionsQuery.ToList();
+            var game = await _gameRepository.GetByIdAsync(gameId);
+            if (game == null)
+                throw new Exception("Game not found");
 
-            foreach (var definition in allDefinitions)
+  
+            var definitions = await _itemRepository.GetAllAsync();
+            foreach (var definition in definitions)
             {
-                var gameItem = new GameItem
-                {
-                    GameId = gameId,
-                    Item = definition,
-                    SpawnTime = DateTime.UtcNow
-                };
-
-                await _gameItemRepository.Add(gameItem);
+                game.AddGameItem(definition);
             }
+            _gameRepository.Update(game);
         }
     }
 }

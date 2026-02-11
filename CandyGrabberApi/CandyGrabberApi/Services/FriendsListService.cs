@@ -35,8 +35,8 @@ namespace CandyGrabberApi.Services
                 {
                     var friendslistCreated1 = new FriendsList(request.SenderId, request.RecipientId);
                     var friendslistCreated2 = new FriendsList(request.RecipientId, request.SenderId);
-                    await _unitOfWork.FriendsList.Add(friendslistCreated1);
-                    await _unitOfWork.FriendsList.Add(friendslistCreated2);
+                    await _unitOfWork.FriendsList.AddAsync(friendslistCreated1);
+                    await _unitOfWork.FriendsList.AddAsync(friendslistCreated2);
                     await _unitOfWork.Save();
                 }
             }

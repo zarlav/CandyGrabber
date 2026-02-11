@@ -2,50 +2,38 @@
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace CandyGrabberApi.Repository
+namespace CandyGrabberApi.Repository;
+public class Repository<T> : IRepository<T> where T : class
 {
-    public class Repository<T> : IRepository<T> where T : class
+    protected readonly DbContext _context;
+    protected readonly DbSet<T> _dbSet;
+    public Repository(DbContext context)
     {
-        protected readonly DbContext _context;
-
-        public Repository(DbContext context)
-        {
-            _context = context;
-        }
-
-        public async Task<T> GetOne(int id)
-        {
-            var obj = await _context.Set<T>().FindAsync(id);
-            if (obj == null)
-            {
-                throw new Exception($"Object of type {typeof(T).Name} with ID {id} does not exist.");
-            }
-            return obj;
-        }
-
-        public async Task<IQueryable<T>> GetAll()
-        {
-            return await Task.FromResult(_context.Set<T>().AsQueryable());
-        }
-
-        public virtual IQueryable<T> Find(Expression<Func<T, bool>> predicate)
-        {
-            return _context.Set<T>().Where(predicate);
-        }
-
-        public async Task Add(T obj)
-        {
-            await _context.Set<T>().AddAsync(obj);
-        }
-
-        public void Delete(T obj)
-        {
-            _context.Set<T>().Remove(obj);
-        }
-
-        public void Update(T obj)
-        {
-            _context.Set<T>().Update(obj);
-        }
+        _context = context;
+        _dbSet = _context.Set<T>();
+    }
+    public async Task<T?> GetByIdAsync(int id)
+    {
+        return await _dbSet.FindAsync(id);
+    }
+    public async Task<List<T>> GetAllAsync()
+    {
+        return await _dbSet.ToListAsync();
+    }
+    public async Task<List<T>> FindAsync(Expression<Func<T, bool>> predicate)
+    {
+        return await _dbSet.Where(predicate).ToListAsync();
+    }
+    public async Task AddAsync(T entity)
+    {
+        await _dbSet.AddAsync(entity);
+    }
+    public void Update(T entity)
+    {
+        _dbSet.Update(entity);
+    }
+    public void Delete(T entity)
+    {
+        _dbSet.Remove(entity);
     }
 }

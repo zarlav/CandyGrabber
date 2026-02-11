@@ -88,7 +88,7 @@ namespace CandyGrabberApi.Services
                 var requestCreated = new GameRequest(request.SenderId, request.RecipientId, request.GameId, request.Timestamp);
                 requestCreated.SetGameRequestStatusToSent();
 
-                await _unitOfWork.GameRequest.Add(requestCreated);
+                await _unitOfWork.GameRequest.AddAsync(requestCreated);
                 await _unitOfWork.Save();
 
                 return requestCreated;

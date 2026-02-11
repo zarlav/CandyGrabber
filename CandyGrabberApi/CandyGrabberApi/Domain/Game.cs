@@ -95,5 +95,36 @@ namespace CandyGrabberApi.Domain
                 Status = GameStatus.WaitingForReconnect;
             }
         }
+        public void AddPlayer(User user)
+        {
+            if (Status != GameStatus.Lobby)
+                throw new InvalidOperationException("Igrac se moze dodati samo u lobby stanju.");
+
+            if (Players.Any(p => p.Id == user.Id))
+                throw new InvalidOperationException("Igrac vec postoji.");
+
+            Players.Add(user);
+        }
+        private void AddGameItemInternal(GameItem gameItem)
+        {
+            GameItems.Add(gameItem);
+        }
+        public void AddGameItem(Item item)
+        {
+            AddGameItemInternal(new GameItem(this, item));
+        }
+        public void GenerateItems(List<Item> availableItems)
+        {
+            for (int i = 0; i < 31; i++)
+            {
+                if (i % 7 == 0)
+                {
+                    var powerUp = availableItems.First(x => x.Type == ItemType.POWER_UP);
+                    AddGameItem(powerUp);
+                }
+                var candy = availableItems.First(x => x.Type == ItemType.CANDY);
+                AddGameItem(candy);
+            }
+        }
     }
 }

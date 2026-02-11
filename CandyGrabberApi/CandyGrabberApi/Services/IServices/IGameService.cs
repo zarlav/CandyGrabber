@@ -4,6 +4,6 @@ namespace CandyGrabberApi.Services.IServices
 {
     public interface IGameService
     {
-        Task<Game> CreateGame();
+        Task<Game> CreateGame(int duration);
     }
 }

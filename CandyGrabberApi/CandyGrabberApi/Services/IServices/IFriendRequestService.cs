@@ -9,6 +9,6 @@ namespace CandyGrabberApi.Services.IServices
         Task AcceptFriendRequest(int requestId);
         Task DeclineFriendRequest(int requestId);
         Task<bool> CheckIfFriendRequestSent(string UserName, string FriendName);
-        Task<List<Request>> GetAllFriendRequestsForUser(int UserId);
+        Task<List<FriendRequest>> GetAllFriendRequestsForUser(int UserId);
     }
 }

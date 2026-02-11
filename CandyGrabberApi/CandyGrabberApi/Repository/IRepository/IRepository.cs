@@ -1,14 +1,18 @@
 ﻿using System.Linq.Expressions;
 
 namespace CandyGrabberApi.Repository.IRepository
-{
+{ 
     public interface IRepository<T> where T : class
     {
-        Task<T> GetOne(int id);
-        Task<IQueryable<T>> GetAll();
-        IQueryable<T> Find(Expression<Func<T, bool>> predicate);
-        Task Add(T obj);
-        void Delete(T obj);
-        void Update(T obj);
+        Task<T?> GetByIdAsync(int id);
+        Task<List<T>> GetAllAsync();
+        Task<List<T>> FindAsync(Expression<Func<T, bool>> predicate);
+
+        Task AddAsync(T entity);
+
+        void Update(T entity);
+        void Delete(T entity);
     }
+
+
 }
