@@ -115,14 +115,25 @@ namespace CandyGrabberApi.Domain
         }
         public void GenerateItems(List<Item> availableItems)
         {
+            var powerUp = availableItems
+                .FirstOrDefault(x => x.Type == ItemType.POWER_UP);
+
+            var candy = availableItems
+                .FirstOrDefault(x => x.Type == ItemType.CANDY);
+
+            if (powerUp == null)
+                throw new Exception("No POWER_UP items defined in database.");
+
+            if (candy == null)
+                throw new Exception("No CANDY items defined in database.");
+
             for (int i = 0; i < 31; i++)
             {
                 if (i % 7 == 0)
                 {
-                    var powerUp = availableItems.First(x => x.Type == ItemType.POWER_UP);
                     AddGameItem(powerUp);
                 }
-                var candy = availableItems.First(x => x.Type == ItemType.CANDY);
+
                 AddGameItem(candy);
             }
         }

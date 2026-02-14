@@ -4,7 +4,7 @@ namespace CandyGrabberApi.Domain
 {
     public class Item
     {
-        public int Id { get; private set; }
+        public int Id { get;  set; }
         public string Name { get; set; }
         public ItemType Type { get; set; }
         protected Item() { }

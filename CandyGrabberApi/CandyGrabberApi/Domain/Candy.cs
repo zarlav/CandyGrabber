@@ -2,7 +2,7 @@
 {
     public class Candy
     {
-        public int ItemId { get; private set; }
+        public int ItemId { get;  set; }
         public int Points { get; set; }
 
         protected Candy() { }

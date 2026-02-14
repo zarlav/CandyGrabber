@@ -2,17 +2,15 @@
 {
     public class PlayerDTO
     {
-        public int UserId { get; init; }
-        public string Username { get; init; } = null!;
+        public int UserId { get; set; }
+        public string Username { get; set; } = null!;
         public int GameId { get; init; }
-        public bool IsHost { get; init; }
-
-        public PlayerDTO(int userId, string username, int gameId, bool isHost)
+        public PlayerDTO() { }
+        public PlayerDTO(int userId, string username, int gameId)
         {
             UserId = userId;
             Username = username;
             GameId = gameId;
-            IsHost = isHost;
         }
     }
 }

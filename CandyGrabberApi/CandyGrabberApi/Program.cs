@@ -1,3 +1,4 @@
+using CandyGrabberApi;
 using CandyGrabberApi.Domain;
 using CandyGrabberApi.Repository;
 using CandyGrabberApi.Repository.IRepository;
@@ -10,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddSignalR();
 builder.Services.AddScoped<IPlayerItemRepository, PlayerItemRepository>();
 builder.Services.AddScoped<IPowerUpRepository, PowerUpRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -49,6 +51,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+app.MapHub<ChatHub>("/chathub");
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

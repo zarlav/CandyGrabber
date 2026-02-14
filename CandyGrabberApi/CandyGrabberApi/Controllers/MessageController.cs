@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace CandyGrabberApi.Controllers
 {
-    [Authorize]
+ //   [Authorize]
     [ApiController]
     [Route("message")]
     public class MessageController : ControllerBase

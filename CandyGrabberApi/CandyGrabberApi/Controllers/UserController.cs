@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CandyGrabberApi.Controllers
 {
-    [Authorize]
+  //  [Authorize]
     [Route("User")]
     [ApiController]
     public class UserController : ControllerBase

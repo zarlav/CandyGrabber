@@ -190,6 +190,72 @@ public class CandyGrabberContext : DbContext
             .WithMany()
             .HasForeignKey(w => w.PlayerId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<Item>().HasData(
+        new
+        {
+            Id = 1,
+            Name = "Basic Candy",
+            Type = ItemType.CANDY
+        },
+        new
+        {
+            Id = 2,
+            Name = "Speed Boost",
+            Type = ItemType.POWER_UP
+        },
+        new
+        {
+            Id = 3,
+            Name = "FREEZE",
+            Type = ItemType.POWER_UP
+        },
+        new
+        {
+            Id = 4,
+            Name = "Double Points",
+            Type = ItemType.POWER_UP
+        },
+        new
+        {
+            Id = 5,
+            Name = "Shield",
+            Type = ItemType.POWER_UP
+        }
+        );
+
+        modelBuilder.Entity<Candy>().HasData(
+            new
+            {
+                ItemId = 1,
+                Points = 10
+            }
+        );
+        modelBuilder.Entity<PowerUp>().HasData(
+             new
+             {
+                 ItemId = 2,
+                 Effect = PowerEffect.SPEED_BOOST,
+                 Duration = 5
+             },
+             new
+             {
+                 ItemId = 3,
+                 Effect = PowerEffect.FREEZE,
+                 Duration = 5
+             },
+             new
+             {
+                 ItemId = 4,
+                 Effect = PowerEffect.DOUBLE_POINTS,
+                 Duration = 5
+             },
+             new
+             {
+                 ItemId = 5,
+                 Effect = PowerEffect.SHIELD,
+                 Duration = 7
+             });
     }
 }
 
