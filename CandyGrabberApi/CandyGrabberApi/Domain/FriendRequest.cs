@@ -48,7 +48,7 @@ namespace CandyGrabberApi.Domain
         {
             lock (_state)
             {
-                if (Status == FriendRequestStatus.NONE)
+                if (Status != FriendRequestStatus.ACCEPTED)
                 {
                     Status = FriendRequestStatus.SENT;
                 }

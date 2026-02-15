@@ -28,7 +28,7 @@ namespace CandyGrabberApi.Domain
         {
             lock (_state)
             {
-                if (GameRequestStatus == GameRequestStatus.NONE)
+                if (GameRequestStatus != GameRequestStatus.ACCEPTED && GameRequestStatus != GameRequestStatus.DECLINED)
                     GameRequestStatus = GameRequestStatus.SENT;
             }
         }

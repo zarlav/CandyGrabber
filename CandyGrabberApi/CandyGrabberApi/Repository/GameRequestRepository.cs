@@ -25,7 +25,7 @@ namespace CandyGrabberApi.Repository
 
         public async Task<List<GameRequest>> GetAllGameRequestByRecipientId(int recipientId)
         {
-            var thresholdTime = DateTime.Now.AddSeconds(-20);
+            var thresholdTime = DateTime.UtcNow.AddSeconds(-20);
 
             return await this._db.GameRequest
                 .Include(x => x.Sender)

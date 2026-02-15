@@ -39,7 +39,7 @@ namespace CandyGrabberApi.Controllers
                     {
                         SenderId = friend1.Id,
                         RecipientId = friend2.Id,
-                        Timestamp = DateTime.Now
+                        Timestamp = DateTime.UtcNow
                     };
                     await this._requestService.SendFriendRequest(request);
                     return Ok(request);

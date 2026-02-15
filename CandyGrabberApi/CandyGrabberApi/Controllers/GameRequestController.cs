@@ -39,7 +39,13 @@ namespace CandyGrabberApi.Controllers
             try
             {
                 Player player = await this._gameRequestService.AcceptGameRequest(requestId);
-                return Ok(player);
+                var playerDto = new PlayerDTO
+                {
+                    Id = player.Id,
+                    UserId = player.User.Id,
+                    GameId = player.Game.Id
+                };
+                return Ok(playerDto);
             }
             catch (Exception e)
             {

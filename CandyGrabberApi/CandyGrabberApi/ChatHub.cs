@@ -57,7 +57,7 @@ namespace CandyGrabberApi
             var friend1 = await this._userService.GetUserByUsername(sender);
             var friend2 = await this._userService.GetUserByUsername(recipient);
 
-            ChatMessagesDTO messagedto = new(friend1.Id, friend2.Id, message.Content, DateTime.Now);
+            ChatMessagesDTO messagedto = new(friend1.Id, friend2.Id, message.Content, DateTime.UtcNow);
             await this._messageService.SendMessage(messagedto);
             await Clients.Group(recipient).SendAsync("ReceiveMessage", sender, message);
         }

@@ -10,6 +10,12 @@ namespace CandyGrabberApi.Services
         private readonly CandyGrabberContext _db;
         public IUnitOfWork _unitOfWork { get; set; }
 
+        public FriendsListService(CandyGrabberContext db, IUnitOfWork unitOfWork)
+        {
+            _db = db;
+            _unitOfWork = unitOfWork;
+        }
+
         public async Task<bool> CheckIfFriends(string UserName, string FriendName)
         {
             var friend1 = await this._unitOfWork.User.GetUserByUsername(UserName);
