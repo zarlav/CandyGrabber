@@ -8,14 +8,22 @@ namespace CandyGrabberApi
 {
     public class ChatHub : Hub
     {
-        public IChatMessagesService _messageService { get; set; }
-        public IUserService _userService { get; set; }
-        public IWinnerService _winnerService { get; set; }
-        public IFriendRequestService _requestService { get; set; }
-        public IGameRequestServices _gameRequestService { get; set; }
-        public IFriendsListService _friendsListService { get; set; }
-        public IUnitOfWork _unitOfWork { get; set; }
-        public ChatHub(CandyGrabberContext db, IChatMessagesService messageService, IUserService userService, IWinnerService winnerService, IFriendRequestService requestService, IGameRequestServices gameRequestService, IFriendsListService friendsListService, IUnitOfWork unitOfWork)
+        private readonly IChatMessagesService _messageService;
+        private readonly IUserService _userService;
+        private readonly IWinnerService _winnerService;
+        private readonly IFriendRequestService _requestService;
+        private readonly IGameRequestServices _gameRequestService;
+        private readonly IFriendsListService _friendsListService;
+        private readonly IUnitOfWork _unitOfWork;
+
+        public ChatHub(
+            IChatMessagesService messageService,
+            IUserService userService,
+            IWinnerService winnerService,
+            IFriendRequestService requestService,
+            IGameRequestServices gameRequestService,
+            IFriendsListService friendsListService,
+            IUnitOfWork unitOfWork)
         {
             _messageService = messageService;
             _userService = userService;
@@ -23,110 +31,249 @@ namespace CandyGrabberApi
             _requestService = requestService;
             _gameRequestService = gameRequestService;
             _friendsListService = friendsListService;
-            this._unitOfWork = unitOfWork;
+            _unitOfWork = unitOfWork;
         }
+
+        // Automatski dodavanje korisnika u grupu po username-u
+        public override async Task OnConnectedAsync()
+        {
+            var username = Context.User?.Identity?.Name;
+            if (!string.IsNullOrEmpty(username))
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, username);
+                await Clients.Caller.SendAsync("Connected", $"Connected as {username}");
+            }
+            await base.OnConnectedAsync();
+        }
+
+        public override async Task OnDisconnectedAsync(Exception? exception)
+        {
+            if (exception != null)
+                Console.WriteLine($"Disconnected: {exception.Message}");
+            await base.OnDisconnectedAsync(exception);
+        }
+
         public async Task SendMessage(string user, string message)
         {
-            await Clients.All.SendAsync("ReceiveMessage", user, message);
+            try
+            {
+                await Clients.All.SendAsync("ReceiveMessage", user, message);
+            }
+            catch (Exception ex)
+            {
+                await Clients.Caller.SendAsync("Error", ex.Message);
+            }
         }
 
         public async Task NewMessage(long username, string message)
         {
-            await Clients.All.SendAsync("messageReceived", username, message);
-        }
-        public async Task SendConnectionId(string connectionId)
-        {
-            await Clients.All.SendAsync("setClientMessage", "A connection with ID '" + connectionId + "' has just connected");
+            try
+            {
+                await Clients.All.SendAsync("messageReceived", username, message);
+            }
+            catch (Exception ex)
+            {
+                await Clients.Caller.SendAsync("Error", ex.Message);
+            }
         }
 
         public async Task JoinGroup(string groupName)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+            try
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+                await Clients.Caller.SendAsync("JoinedGroup", groupName);
+            }
+            catch (Exception ex)
+            {
+                await Clients.Caller.SendAsync("Error", ex.Message);
+            }
         }
 
         public async Task LeaveGroup(string groupName)
         {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
+            try
+            {
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
+                await Clients.Caller.SendAsync("LeftGroup", groupName);
+            }
+            catch (Exception ex)
+            {
+                await Clients.Caller.SendAsync("Error", ex.Message);
+            }
         }
+
         public async Task SendMessageToGroup(string groupName, string message)
         {
-            await Clients.Group(groupName).SendAsync("ReceiveMessage", Context.User.Identity.Name, message);
+            try
+            {
+                var username = Context.User?.Identity?.Name ?? "Unknown";
+                await Clients.Group(groupName).SendAsync("ReceiveMessage", username, message);
+            }
+            catch (Exception ex)
+            {
+                await Clients.Caller.SendAsync("Error", ex.Message);
+            }
         }
+
         public async Task SendMessageToUser(string recipient, string sender, ChatMessage message)
         {
-            var friend1 = await this._userService.GetUserByUsername(sender);
-            var friend2 = await this._userService.GetUserByUsername(recipient);
+            try
+            {
+                var senderUser = await _userService.GetUserByUsername(sender);
+                var recipientUser = await _userService.GetUserByUsername(recipient);
 
-            ChatMessagesDTO messagedto = new(friend1.Id, friend2.Id, message.Content, DateTime.UtcNow);
-            await this._messageService.SendMessage(messagedto);
-            await Clients.Group(recipient).SendAsync("ReceiveMessage", sender, message);
+                if (senderUser == null || recipientUser == null)
+                {
+                    await Clients.Caller.SendAsync("Error", "User not found");
+                    return;
+                }
+
+                var dto = new ChatMessagesDTO(senderUser.Id, recipientUser.Id, message.Content, DateTime.UtcNow);
+                await _messageService.SendMessage(dto);
+
+                await Clients.Group(recipient).SendAsync("ReceiveMessage", sender, message);
+            }
+            catch (Exception ex)
+            {
+                await Clients.Caller.SendAsync("Error", ex.Message);
+            }
         }
+
         public async Task SendFriendRequest(string username, string friendUsername)
         {
-            var friend1 = await this._userService.GetUserByUsername(username);
-            var friend2 = await this._userService.GetUserByUsername(friendUsername);
-            if (friend1 != null && friend2 != null)
+            try
             {
+                var user1 = await _userService.GetUserByUsername(username);
+                var user2 = await _userService.GetUserByUsername(friendUsername);
 
-                FriendRequestDTO request = new FriendRequestDTO
+                if (user1 == null || user2 == null)
                 {
-                    SenderId = friend1.Id,
-                    RecipientId = friend2.Id,
-                    Timestamp = DateTime.Now
+                    await Clients.Caller.SendAsync("Error", "User not found");
+                    return;
+                }
+
+                var request = new FriendRequestDTO
+                {
+                    SenderId = user1.Id,
+                    RecipientId = user2.Id,
+                    Timestamp = DateTime.UtcNow
                 };
-                await this._requestService.SendFriendRequest(request);
+
+                await _requestService.SendFriendRequest(request);
                 await Clients.Group(friendUsername).SendAsync("FriendRequestSent", username);
             }
+            catch (Exception ex)
+            {
+                await Clients.Caller.SendAsync("Error", ex.Message);
+            }
         }
+
         public async Task AcceptFriendRequest(int requestId, string username, string sender)
         {
-            await this._requestService.AcceptFriendRequest(requestId);
-            await this._friendsListService.CreateFriendship(requestId);
-            await Clients.Group(username).SendAsync("FetchFriendRequests", sender);
-            await Clients.Group(sender).SendAsync("FriendRequestAccepted", username);
-            await Clients.Group(username).SendAsync("RefetchFriends", sender);
-            await Clients.Group(sender).SendAsync("RefetchFriends", username);
+            try
+            {
+                await _requestService.AcceptFriendRequest(requestId);
+                await _friendsListService.CreateFriendship(requestId);
+
+                await Clients.Group(username).SendAsync("FetchFriendRequests", sender);
+                await Clients.Group(sender).SendAsync("FriendRequestAccepted", username);
+                await Clients.Group(username).SendAsync("RefetchFriends", sender);
+                await Clients.Group(sender).SendAsync("RefetchFriends", username);
+            }
+            catch (Exception ex)
+            {
+                await Clients.Caller.SendAsync("Error", ex.Message);
+            }
         }
+
         public async Task DeclineFriendRequest(int requestId, string username)
         {
-            var request = await this._unitOfWork.Friendrequest.GetRequestById(requestId);
-            if (request == null)
+            try
             {
-                throw new Exception("No such friend request");
+                var request = await _unitOfWork.Friendrequest.GetRequestById(requestId);
+                if (request != null)
+                {
+                    _unitOfWork.Friendrequest.Delete(request);
+                    await Clients.Group(username).SendAsync("FetchFriendRequests", Context.User?.Identity?.Name);
+                }
+                else
+                {
+                    await Clients.Caller.SendAsync("Error", "Friend request not found");
+                }
             }
-            _unitOfWork.Friendrequest.Delete(request);
-            await Clients.Group(username).SendAsync("FetchFriendRequests", Context.User.Identity.Name);
+            catch (Exception ex)
+            {
+                await Clients.Caller.SendAsync("Error", ex.Message);
+            }
         }
+
         public async Task SendGameInviteToUser(string username, string friendname, GameRequestDTO gameRequest)
         {
-            GameRequest gamereq = await this._gameRequestService.SendGameRequest(gameRequest);
-            if (gamereq != null)
+            try
             {
-                await Clients.Group(friendname).SendAsync("ReceiveGameInvite", username, gamereq);
+                var gamereq = await _gameRequestService.SendGameRequest(gameRequest);
+                if (gamereq != null)
+                {
+                    await Clients.Group(friendname).SendAsync("ReceiveGameInvite", username, gamereq);
+                }
+            }
+            catch (Exception ex)
+            {
+                await Clients.Caller.SendAsync("Error", ex.Message);
             }
         }
 
         public async Task AcceptGameInviteToUser(User user, string friendname, int gameRequestId)
         {
-            await Clients.Group(friendname).SendAsync("GameInviteAccepted", user);
+            try
+            {
+                await Clients.Group(friendname).SendAsync("GameInviteAccepted", user);
 
-            Player playerParam = await this._gameRequestService.AcceptGameRequest(gameRequestId);
-
-            await Clients.Group(user.Username).SendAsync("CreatedPlayer", playerParam);
+                var player = await _gameRequestService.AcceptGameRequest(gameRequestId);
+                await Clients.Group(user.Username).SendAsync("CreatedPlayer", player);
+            }
+            catch (Exception ex)
+            {
+                await Clients.Caller.SendAsync("Error", ex.Message);
+            }
         }
+
         public async Task DeclineGameInviteToUser(int gameRequestId)
         {
-
-            await this._gameRequestService.DeclineGameRequest(gameRequestId);
+            try
+            {
+                await _gameRequestService.DeclineGameRequest(gameRequestId);
+            }
+            catch (Exception ex)
+            {
+                await Clients.Caller.SendAsync("Error", ex.Message);
+            }
         }
+
         public async Task StartGame(int gameId)
         {
-            await Clients.Group("game:" + gameId).SendAsync("GameStarted");
+            try
+            {
+                await Clients.Group($"game:{gameId}").SendAsync("GameStarted");
+            }
+            catch (Exception ex)
+            {
+                await Clients.Caller.SendAsync("Error", ex.Message);
+            }
         }
+
         public async Task SendWinner(int gameId, int playerId)
         {
-            await Clients.Group("game:" + gameId).SendAsync("ReceiveWinner", playerId);
-            await this._winnerService.CreateWinner(playerId);
+            try
+            {
+                await Clients.Group($"game:{gameId}").SendAsync("ReceiveWinner", playerId);
+                await _winnerService.CreateWinner(playerId);
+            }
+            catch (Exception ex)
+            {
+                await Clients.Caller.SendAsync("Error", ex.Message);
+            }
         }
     }
 }

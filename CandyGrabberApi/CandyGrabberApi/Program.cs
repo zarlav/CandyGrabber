@@ -7,11 +7,15 @@ using CandyGrabberApi.Services.IServices;
 using CandyGrabberApi.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(options =>
+{
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(60); // koliko dugo server ceka na klijenta
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15);     // koliko ?esto server šalje ping
+});
+
+// Repositories
 builder.Services.AddScoped<IPlayerItemRepository, PlayerItemRepository>();
 builder.Services.AddScoped<IPowerUpRepository, PowerUpRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -27,7 +31,8 @@ builder.Services.AddScoped<IWinnerRepository, WinnerRepository>();
 builder.Services.AddScoped<IGameItemRepository, GameItemRepository>();
 builder.Services.AddScoped<ICandyRepository, CandyRepository>();
 builder.Services.AddScoped<IJWTservice, JWTservice>();
-//Services
+
+// Services
 builder.Services.AddScoped<IChatMessagesService, ChatMessagesService>();
 builder.Services.AddScoped<IFriendRequestService, FriendRequestService>();
 builder.Services.AddScoped<IFriendsListService, FriendsListService>();
@@ -38,6 +43,7 @@ builder.Services.AddScoped<IItemService, ItemService>();
 builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
+// DbContext
 builder.Services.AddDbContext<CandyGrabberContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection")
@@ -46,16 +52,29 @@ builder.Services.AddDbContext<CandyGrabberContext>(options =>
 
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins(
+            "https://localhost:3000",
+            "https://localhost:7274",
+            "https://localhost:4200",
+            "http://localhost:5174" 
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials();
+    });
+});
+
 var app = builder.Build();
 
-app.MapHub<ChatHub>("/chathub");
-
-
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -63,16 +82,17 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseRouting();
 
-app.UseCors(options => options
-    .WithOrigins(new[] { "https://localhost:3000", "https://localhost:7274", "https://localhost:4200", "http://localhost:5173" })
-    .AllowAnyHeader()
-    .AllowAnyMethod()
-    .AllowCredentials());
+// CORS mora pre MapHub i MapControllers
+app.UseCors("AllowFrontend");
+
 app.UseAuthorization();
 
+// SignalR Hub
+app.MapHub<ChatHub>("/chathub");
+
+// Controllers
 app.MapControllers();
 
 app.Run();
