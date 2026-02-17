@@ -6,16 +6,18 @@ using CandyGrabberApi.Services;
 using CandyGrabberApi.Services.IServices;
 using CandyGrabberApi.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
+
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSignalR(options =>
 {
-    options.ClientTimeoutInterval = TimeSpan.FromSeconds(60); // koliko dugo server ceka na klijenta
-    options.KeepAliveInterval = TimeSpan.FromSeconds(15);     // koliko ?esto server šalje ping
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
 });
 
-// Repositories
 builder.Services.AddScoped<IPlayerItemRepository, PlayerItemRepository>();
 builder.Services.AddScoped<IPowerUpRepository, PowerUpRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -32,7 +34,6 @@ builder.Services.AddScoped<IGameItemRepository, GameItemRepository>();
 builder.Services.AddScoped<ICandyRepository, CandyRepository>();
 builder.Services.AddScoped<IJWTservice, JWTservice>();
 
-// Services
 builder.Services.AddScoped<IChatMessagesService, ChatMessagesService>();
 builder.Services.AddScoped<IFriendRequestService, FriendRequestService>();
 builder.Services.AddScoped<IFriendsListService, FriendsListService>();
@@ -42,36 +43,27 @@ builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IItemService, ItemService>();
 builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IWinnerService, WinnerService>();
 
-// DbContext
 builder.Services.AddDbContext<CandyGrabberContext>(options =>
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection")
-    )
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
-
-builder.Services.AddAuthorization();
-builder.Services.AddControllers();
-
-// Swagger
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins(
-            "https://localhost:3000",
-            "https://localhost:7274",
-            "https://localhost:4200",
-            "http://localhost:5174" 
-        )
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        .AllowCredentials();
+        policy.WithOrigins("http://localhost:5173", "http://localhost:5174", "https://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
+
+builder.Services.AddAuthorization();
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
@@ -83,16 +75,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
-
-// CORS mora pre MapHub i MapControllers
 app.UseCors("AllowFrontend");
-
 app.UseAuthorization();
 
-// SignalR Hub
 app.MapHub<ChatHub>("/chathub");
-
-// Controllers
 app.MapControllers();
 
 app.Run();

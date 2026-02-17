@@ -1,19 +1,16 @@
 import { connection } from "./connection.js";
-import { MessageManager } from "../managers/messageManager.js";
-import { FriendRequestManager } from "../managers/friendRequestManager.js";
-import { GameRequestManager } from "../managers/gameRequestManager.js";
 
 export function registerSignalREvents() {
+    if (!connection) {
+        console.warn("SignalR: Connection not initialized yet. Events will be attached later.");
+        return;
+    }
 
-    connection.on("ReceiveMessage", (sender, message) => {
-        MessageManager.receive(sender, message);
+    connection.on("ReceiveMessage", (sender, content) => {
+        console.log(`Message from ${sender}: ${content}`);
     });
 
-    connection.on("FriendRequestSent", (username) => {
-        FriendRequestManager.receive(username);
-    });
-
-    connection.on("ReceiveGameInvite", (username) => {
-        GameRequestManager.receive(username);
+    connection.on("FriendRequestSent", (sender) => {
+        console.log(`Friend request from: ${sender}`);
     });
 }
