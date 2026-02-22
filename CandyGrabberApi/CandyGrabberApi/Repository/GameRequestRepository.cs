@@ -25,13 +25,14 @@ namespace CandyGrabberApi.Repository
 
         public async Task<List<GameRequest>> GetAllGameRequestByRecipientId(int recipientId)
         {
-            var thresholdTime = DateTime.UtcNow.AddSeconds(-20);
+            var thresholdTimeUtc = DateTime.UtcNow.AddSeconds(-200);
 
-            return await this._db.GameRequest
+            return await _db.GameRequest
                 .Include(x => x.Sender)
                 .Include(x => x.Recipient)
-                .Where(x => x.RecipientId == recipientId && x.TimeStamp > thresholdTime)
-                .Where(x => x.GameRequestStatus == Domain.Enums.GameRequestStatus.SENT)
+                .Where(x => x.RecipientId == recipientId
+                            && x.GameRequestStatus == Domain.Enums.GameRequestStatus.SENT
+                            && x.TimeStamp > thresholdTimeUtc)
                 .ToListAsync();
         }
 

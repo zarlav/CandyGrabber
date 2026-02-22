@@ -15,7 +15,7 @@ export async function createApp() {
         backgroundColor: 0x1e1e1e
     });
 
-    document.body.appendChild(app.canvas);
+    document.body.appendChild(app.view);
 
     const loginPage = new LoginPage(app, async (userData) => {
         if (userData && userData.username) {

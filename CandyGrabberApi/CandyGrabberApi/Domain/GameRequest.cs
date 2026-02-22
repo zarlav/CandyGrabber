@@ -21,14 +21,12 @@ namespace CandyGrabberApi.Domain
             RecipientId = recipientId;
             GameId = gameId;
             TimeStamp = timeStamp;
-            GameRequestStatus = GameRequestStatus.NONE;
         }
 
         public void SetGameRequestStatusToSent()
         {
             lock (_state)
             {
-                if (GameRequestStatus != GameRequestStatus.ACCEPTED && GameRequestStatus != GameRequestStatus.DECLINED)
                     GameRequestStatus = GameRequestStatus.SENT;
             }
         }
