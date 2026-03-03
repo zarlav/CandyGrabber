@@ -5,6 +5,7 @@ namespace CandyGrabberApi.Domain
 {
     public class User
     {
+        [JsonIgnore]
         public int Id { get; private set; }
 
         public string Name { get;  set; }
@@ -14,14 +15,18 @@ namespace CandyGrabberApi.Domain
         public string PasswordHash { get;  set; }
         public int GamesWon { get;  set; }
         public int GamesLost { get;  set; }
-
+        [JsonIgnore]
         public ICollection<FriendsList> SentFriendships { get; } = new List<FriendsList>();
+        [JsonIgnore]
         public ICollection<FriendsList> ReceivedFriendships { get; } = new List<FriendsList>();
-
+        [JsonIgnore]
         public ICollection<ChatMessage> SentMessages { get; } = new List<ChatMessage>();
+        [JsonIgnore]
         public ICollection<ChatMessage> ReceivedMessages { get; } = new List<ChatMessage>();
+        [JsonIgnore]
 
         public ICollection<GameRequest> SentRequests { get; } = new List<GameRequest>();
+        [JsonIgnore]
         public ICollection<GameRequest> ReceivedRequests { get; } = new List<GameRequest>();
 
         protected User() { }

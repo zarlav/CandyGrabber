@@ -24,21 +24,19 @@ namespace CandyGrabberApi.Controllers
             _friendsListService = friendsListService;
             _userService = userService;
         }
-        [Route("SendFriendRequest/{username}/{friendUsername}")]
+        [Route("SendFriendRequest/{userId}/{friendUsername}")]
         [HttpPost]
-        public async Task<IActionResult> SendFriendRequest(string username, string friendUsername)
+        public async Task<IActionResult> SendFriendRequest(int userId, string friendUsername)
         {
             try
             {
-                var friend1 = await this._userService.GetUserByUsername(username);
-                var friend2 = await this._userService.GetUserByUsername(friendUsername);
-                if (friend1 != null && friend2 != null)
+                var friend = await this._userService.GetUserByUsername(friendUsername);
+                if (userId > 0 && friend != null)
                 {
-
                     FriendRequestDTO request = new FriendRequestDTO
                     {
-                        SenderId = friend1.Id,
-                        RecipientId = friend2.Id,
+                        SenderId = userId,
+                        RecipientId = friend.Id,
                         Timestamp = DateTime.UtcNow
                     };
                     await this._requestService.SendFriendRequest(request);

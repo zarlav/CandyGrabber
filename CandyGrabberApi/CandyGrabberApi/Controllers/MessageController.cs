@@ -2,6 +2,7 @@
 using CandyGrabberApi.DTOs;
 using CandyGrabberApi.Services;
 using CandyGrabberApi.Services.IServices;
+using CandyGrabberApi.SignalR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;

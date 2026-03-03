@@ -1,5 +1,6 @@
 ﻿using CandyGrabberApi.DTOs.UserDTO;
 using CandyGrabberApi.Services.IServices;
+using CandyGrabberApi.UnitOfWork;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,12 +12,14 @@ namespace CandyGrabberApi.Controllers
     public class UserController : ControllerBase
     {
         private readonly CandyGrabberContext _db;
+        private readonly IUnitOfWork _unitOfWork;
         public IUserService _userService { get; set; }
 
-        public UserController(CandyGrabberContext db, IUserService userService)
+        public UserController(CandyGrabberContext db, IUserService userService, IUnitOfWork unitOfWork)
         {
             _db = db;
             _userService = userService;
+            _unitOfWork = unitOfWork;
         }
 
         [AllowAnonymous]
@@ -37,16 +40,29 @@ namespace CandyGrabberApi.Controllers
         [AllowAnonymous]
         [Route("Login")]
         [HttpPost]
-        public async Task<IActionResult> Login([FromBody] UserLoginDTO user)
+        public async Task<IActionResult> Login([FromBody] UserLoginDTO userDto)
         {
             try
             {
-                var result = await this._userService.Login(user.Username, user.Password);
+                var token = await _userService.Login(userDto.Username, userDto.Password);
 
-                Response.Cookies.Append("jwt", result, new CookieOptions { HttpOnly = false, Secure = false, SameSite = SameSiteMode.None });
+                var user = (await _unitOfWork.User
+                    .FindAsync(u => u.Username == userDto.Username))
+                    .FirstOrDefault();
 
+                Response.Cookies.Append("jwt", token, new CookieOptions
+                {
+                    HttpOnly = false,
+                    Secure = false,
+                    SameSite = SameSiteMode.None
+                });
 
-                return Ok(new { message = "success" });
+                return Ok(new
+                {
+                    Id = user.Id,
+                    Username = user.Username,
+                    Token = token
+                });
             }
             catch (Exception e)
             {

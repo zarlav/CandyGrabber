@@ -1,9 +1,9 @@
-using CandyGrabberApi;
 using CandyGrabberApi.Domain;
 using CandyGrabberApi.Repository;
 using CandyGrabberApi.Repository.IRepository;
 using CandyGrabberApi.Services;
 using CandyGrabberApi.Services.IServices;
+using CandyGrabberApi.SignalR;
 using CandyGrabberApi.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
@@ -17,7 +17,8 @@ builder.Services.AddSignalR(options =>
     options.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
     options.KeepAliveInterval = TimeSpan.FromSeconds(15);
 });
-
+builder.Services.AddSingleton<IPublisher, Publisher>();
+builder.Services.AddHostedService<ChatConsumer>();
 builder.Services.AddScoped<IPlayerItemRepository, PlayerItemRepository>();
 builder.Services.AddScoped<IPowerUpRepository, PowerUpRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
