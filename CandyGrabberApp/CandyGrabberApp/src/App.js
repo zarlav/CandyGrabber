@@ -9,24 +9,22 @@ export let app;
 export async function createApp() {
     app = new PIXI.Application();
 
-    await app.init({
-        width: 900,
-        height: 600,
-        backgroundColor: 0x1e1e1e
-    });
+   await app.init({
+    resizeTo: window,
+    backgroundColor: 0x0f172a
+});
 
     document.body.appendChild(app.view);
 
     const loginPage = new LoginPage(app, async (userData) => {
         if (userData && userData.username) {
-            // 1. Pokreni konekciju
             await startConnection(userData.username);
             
             registerSignalREvents();
 
             loginPage.destroy();
 
-            const lobby = new LobbyScene(userData);
+            const lobby = new LobbyScene(app);
             app.stage.addChild(lobby.container);
         }
     });

@@ -1,7 +1,6 @@
 import * as signalR from "@microsoft/signalr";
 import { config } from "../config.js";
 
-// Kreiramo praznu varijablu
 export let connection = null;
 
 export function createConnection(username) {

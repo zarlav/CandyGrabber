@@ -6,7 +6,7 @@ export class GameRequestManager {
 
 async send(request) {
     const response = await fetch(
-        `${this.baseUrl}/GameRequest/SendGameRequest`,
+        `${this.baseUrl}GameRequest/SendGameRequest`,
         {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -25,7 +25,7 @@ async send(request) {
 async getByRecipient(recipientId) {
     console.log("getByRecipient called with:", recipientId); 
     const response = await fetch(
-        `${this.baseUrl}/GameRequest/GetAllGameRequestByRecipientId/${recipientId}`
+        `${this.baseUrl}GameRequest/GetAllGameRequestByRecipientId/${recipientId}`
     );
 
     if (!response.ok) {
@@ -42,7 +42,7 @@ async getByRecipient(recipientId) {
 
     async accept(requestId) {
         const response = await fetch(
-            `${this.baseUrl}/GameRequest/AcceptGameRequest/${requestId}`,
+            `${this.baseUrl}GameRequest/AcceptGameRequest/${requestId}`,
             { method: "PUT" }
         );
 
@@ -51,7 +51,7 @@ async getByRecipient(recipientId) {
 
     async decline(requestId) {
         await fetch(
-            `${this.baseUrl}/GameRequest/DeclineGameRequest/${requestId}`,
+            `${this.baseUrl}GameRequest/DeclineGameRequest/${requestId}`,
             { method: "DELETE" }
         );
     }

@@ -1,12 +1,15 @@
-import * as PIXI from "pixi.js";
-import { app } from "../App.js";
+import { sendMessage } from "../managers/messageManager";
+import { registerChatEvents } from "../signalR/chatEvents";
 
-export class ChatScene {
+let messages = [];
 
-    static addMessage(text) {
-        const msg = new PIXI.Text(text, { fill: 0xffffff });
-        msg.x = 500;
-        msg.y = 100 + Math.random() * 300;
-        app.stage.addChild(msg);
-    }
+registerChatEvents((message) => {
+    messages.push(message);
+    renderMessages();
+});
+
+function handleSend() {
+    const input = document.getElementById("chatInput");
+    sendMessage(selectedUserId, input.value);
+    input.value = "";
 }

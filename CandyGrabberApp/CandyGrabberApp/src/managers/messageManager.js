@@ -1,8 +1,5 @@
-import { ChatScene } from "../scenes/chatScene.js";
+import { connection } from "../signalR/connection";
 
-export const MessageManager = {
-
-    receive(sender, message) {
-        ChatScene.addMessage(sender + ": " + message);
-    }
-};
+export async function sendMessage(receiverId, content) {
+    await connection.invoke("SendMessage", receiverId, content);
+}
