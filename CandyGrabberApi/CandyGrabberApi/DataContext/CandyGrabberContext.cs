@@ -125,20 +125,14 @@ public class CandyGrabberContext : DbContext
 
         modelBuilder.Entity<GameRequest>()
             .HasOne(gr => gr.Sender)
-            .WithMany()
+            .WithMany(u => u.SentGameRequests) 
             .HasForeignKey(gr => gr.SenderId)
             .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<GameRequest>()
             .HasOne(gr => gr.Recipient)
-            .WithMany()
+            .WithMany(u => u.ReceivedGameRequests)
             .HasForeignKey(gr => gr.RecipientId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        modelBuilder.Entity<GameRequest>()
-            .HasOne(gr => gr.Game)
-            .WithMany(g => g.Invitations)
-            .HasForeignKey(gr => gr.GameId)
             .OnDelete(DeleteBehavior.Restrict);
 
         // Item

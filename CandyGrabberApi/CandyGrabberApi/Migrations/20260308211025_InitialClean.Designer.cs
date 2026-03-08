@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CandyGrabberApi.Migrations
 {
     [DbContext(typeof(CandyGrabberContext))]
-    [Migration("20260214190523_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260308211025_InitialClean")]
+    partial class InitialClean
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -71,7 +71,7 @@ namespace CandyGrabberApi.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("TimeStamp")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int?>("UserId")
                         .HasColumnType("integer");
@@ -110,7 +110,7 @@ namespace CandyGrabberApi.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("TimeStamp")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("Id");
 
@@ -191,7 +191,7 @@ namespace CandyGrabberApi.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("SpawnTime")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("Id");
 
@@ -210,9 +210,6 @@ namespace CandyGrabberApi.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("GameId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("GameRequestStatus")
                         .HasColumnType("integer");
 
@@ -223,25 +220,13 @@ namespace CandyGrabberApi.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("TimeStamp")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("UserId1")
-                        .HasColumnType("integer");
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("GameId");
 
                     b.HasIndex("RecipientId");
 
                     b.HasIndex("SenderId");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("UserId1");
 
                     b.ToTable("GameRequest");
                 });
@@ -330,7 +315,7 @@ namespace CandyGrabberApi.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("AcquiredAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
@@ -554,33 +539,17 @@ namespace CandyGrabberApi.Migrations
 
             modelBuilder.Entity("CandyGrabberApi.Domain.GameRequest", b =>
                 {
-                    b.HasOne("CandyGrabberApi.Domain.Game", "Game")
-                        .WithMany("Invitations")
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("CandyGrabberApi.Domain.User", "Recipient")
-                        .WithMany()
+                        .WithMany("ReceivedGameRequests")
                         .HasForeignKey("RecipientId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("CandyGrabberApi.Domain.User", "Sender")
-                        .WithMany()
+                        .WithMany("SentGameRequests")
                         .HasForeignKey("SenderId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("CandyGrabberApi.Domain.User", null)
-                        .WithMany("ReceivedRequests")
-                        .HasForeignKey("UserId");
-
-                    b.HasOne("CandyGrabberApi.Domain.User", null)
-                        .WithMany("SentRequests")
-                        .HasForeignKey("UserId1");
-
-                    b.Navigation("Game");
 
                     b.Navigation("Recipient");
 
@@ -649,8 +618,6 @@ namespace CandyGrabberApi.Migrations
                 {
                     b.Navigation("GameItems");
 
-                    b.Navigation("Invitations");
-
                     b.Navigation("Players");
                 });
 
@@ -663,15 +630,15 @@ namespace CandyGrabberApi.Migrations
                 {
                     b.Navigation("ReceivedFriendships");
 
-                    b.Navigation("ReceivedMessages");
+                    b.Navigation("ReceivedGameRequests");
 
-                    b.Navigation("ReceivedRequests");
+                    b.Navigation("ReceivedMessages");
 
                     b.Navigation("SentFriendships");
 
-                    b.Navigation("SentMessages");
+                    b.Navigation("SentGameRequests");
 
-                    b.Navigation("SentRequests");
+                    b.Navigation("SentMessages");
                 });
 #pragma warning restore 612, 618
         }

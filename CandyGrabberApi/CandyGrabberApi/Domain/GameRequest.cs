@@ -11,15 +11,12 @@ namespace CandyGrabberApi.Domain
         public int SenderId { get; set; }
         public User Recipient { get; set; }
         public int RecipientId { get; set; }
-        public Game Game { get; set; }
-        public int GameId { get; set; }
         public DateTime TimeStamp { get; set; }
         public GameRequestStatus GameRequestStatus { get; set; }
-        public GameRequest(int senderId, int recipientId, int gameId, DateTime timeStamp)
+        public GameRequest(int senderId, int recipientId, DateTime timeStamp)
         {
             SenderId = senderId;
             RecipientId = recipientId;
-            GameId = gameId;
             TimeStamp = timeStamp;
         }
 

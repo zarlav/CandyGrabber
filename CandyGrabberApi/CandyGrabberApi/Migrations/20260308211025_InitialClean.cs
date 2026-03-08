@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CandyGrabberApi.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialClean : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -102,7 +102,7 @@ namespace CandyGrabberApi.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ItemId = table.Column<int>(type: "integer", nullable: false),
                     GameId = table.Column<int>(type: "integer", nullable: false),
-                    SpawnTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    SpawnTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     IsCollected = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -131,7 +131,7 @@ namespace CandyGrabberApi.Migrations
                     SenderId = table.Column<int>(type: "integer", nullable: false),
                     RecipientId = table.Column<int>(type: "integer", nullable: false),
                     Content = table.Column<string>(type: "text", nullable: false),
-                    TimeStamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    TimeStamp = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     UserId = table.Column<int>(type: "integer", nullable: true),
                     UserId1 = table.Column<int>(type: "integer", nullable: true)
                 },
@@ -170,7 +170,7 @@ namespace CandyGrabberApi.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     RecipientId = table.Column<int>(type: "integer", nullable: false),
                     SenderId = table.Column<int>(type: "integer", nullable: false),
-                    TimeStamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    TimeStamp = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -236,21 +236,12 @@ namespace CandyGrabberApi.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     SenderId = table.Column<int>(type: "integer", nullable: false),
                     RecipientId = table.Column<int>(type: "integer", nullable: false),
-                    GameId = table.Column<int>(type: "integer", nullable: false),
-                    TimeStamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    GameRequestStatus = table.Column<int>(type: "integer", nullable: false),
-                    UserId = table.Column<int>(type: "integer", nullable: true),
-                    UserId1 = table.Column<int>(type: "integer", nullable: true)
+                    TimeStamp = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    GameRequestStatus = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_GameRequest", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_GameRequest_Game_GameId",
-                        column: x => x.GameId,
-                        principalTable: "Game",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_GameRequest_User_RecipientId",
                         column: x => x.RecipientId,
@@ -263,16 +254,6 @@ namespace CandyGrabberApi.Migrations
                         principalTable: "User",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_GameRequest_User_UserId",
-                        column: x => x.UserId,
-                        principalTable: "User",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_GameRequest_User_UserId1",
-                        column: x => x.UserId1,
-                        principalTable: "User",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -311,7 +292,7 @@ namespace CandyGrabberApi.Migrations
                     ItemId = table.Column<int>(type: "integer", nullable: false),
                     Quantity = table.Column<int>(type: "integer", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    AcquiredAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    AcquiredAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -438,11 +419,6 @@ namespace CandyGrabberApi.Migrations
                 column: "ItemId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_GameRequest_GameId",
-                table: "GameRequest",
-                column: "GameId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_GameRequest_RecipientId",
                 table: "GameRequest",
                 column: "RecipientId");
@@ -451,16 +427,6 @@ namespace CandyGrabberApi.Migrations
                 name: "IX_GameRequest_SenderId",
                 table: "GameRequest",
                 column: "SenderId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_GameRequest_UserId",
-                table: "GameRequest",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_GameRequest_UserId1",
-                table: "GameRequest",
-                column: "UserId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Player_GameId",

@@ -10,7 +10,6 @@ namespace CandyGrabberApi.Domain
         public int Duration { get; set; }
         public ICollection<GameItem> GameItems { get;  set; } = new List<GameItem>();
         public GameStatus Status { get;  set; }
-        public ICollection<GameRequest> Invitations { get; set; } = new List<GameRequest>();
         protected Game() { }
         public Game(int duration)
         {

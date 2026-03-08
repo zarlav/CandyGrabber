@@ -1,6 +1,5 @@
 import * as signalR from "@microsoft/signalr";
 import { config } from "../config.js";
-
 export let connection = null;
 
 export function createConnection(username) {

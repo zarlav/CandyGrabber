@@ -11,9 +11,9 @@ namespace CandyGrabberApi.Repository
         {
             _db = db;
         }
-        public async Task<GameRequest> GetGameRequestBySenderAndRecipient(int SenderId, int RecipientId, int gameId)
+        public async Task<GameRequest> GetGameRequestBySenderAndRecipient(int SenderId, int RecipientId)
         {
-            var request = await _db.GameRequest.Where(x => x.SenderId == SenderId && x.RecipientId == RecipientId && x.GameId == gameId).FirstOrDefaultAsync();
+            var request = await _db.GameRequest.Where(x => x.SenderId == SenderId && x.RecipientId == RecipientId).FirstOrDefaultAsync();
             return request;
         }
 
@@ -36,12 +36,5 @@ namespace CandyGrabberApi.Repository
                 .ToListAsync();
         }
 
-        public async Task<List<GameRequest>> GetGameRequests(int gameId)
-        {
-            return await this._db.GameRequest
-                .Where(x => x.GameId == gameId)
-                .Where(x => x.GameRequestStatus == Domain.Enums.GameRequestStatus.SENT)
-                .ToListAsync();
-        }
     }
 }

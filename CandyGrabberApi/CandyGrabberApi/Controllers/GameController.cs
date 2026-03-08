@@ -32,12 +32,33 @@ namespace CandyGrabberApi.Controllers
 
                 var playerDto = new PlayerDTO
                 {
-                    UserId = player.Id,
+                    UserId = player.UserId,
                     Username = player.User.Username,
-                    GameId = game.Id
+                    GameId = player.GameId
                 };
 
                 return Ok(playerDto);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+        [HttpPost("JoinGame")]
+        public async Task<IActionResult> JoinGame(int gameId, int userId)
+        {
+            try
+            {
+                Player player = await _playerService.CreatePlayer(userId, gameId);
+
+                var dto = new PlayerDTO
+                {
+                    UserId = player.UserId,
+                    Username = player.User.Username,
+                    GameId = player.GameId
+                };
+
+                return Ok(dto);
             }
             catch (Exception e)
             {

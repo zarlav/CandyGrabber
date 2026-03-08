@@ -37,8 +37,6 @@ namespace CandyGrabberApi.Services
             return await _playerRepository.GetPlayersByGameIdAsync(gameId);
         }
 
-
-                    // OVVVVVVVVVVVO DAA SE MENJA OVAJ ANTIII PATTERN
         public async Task<Player> CreatePlayer(int userId, int gameId)
         {
             var user = await _userRepository.GetByIdAsync(userId);

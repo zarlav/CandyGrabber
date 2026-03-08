@@ -8,7 +8,7 @@ namespace CandyGrabberApi.Services.IServices
         Task<GameRequest> SendGameRequest(GameRequestDTO request);
         Task<Player> AcceptGameRequest(int gameRequestId);
         Task DeclineGameRequest(int gameRequestId);
-        Task DeleteGameRequests(int gameId);
+       // Task DeleteGameRequests(int gameId);
         Task<List<GameRequest>> GetAllGameRequestByRecipientId(int recipientId);
     }
 }

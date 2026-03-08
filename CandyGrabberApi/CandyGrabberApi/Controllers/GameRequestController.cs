@@ -32,19 +32,21 @@ namespace CandyGrabberApi.Controllers
                 return BadRequest(e.Message);
             }
         }
-        [Route("AcceptGameRequest/{requestId}")]
-        [HttpPut]
+        [HttpPut("AcceptGameRequest/{requestId}")]
         public async Task<IActionResult> AcceptGameRequest(int requestId)
         {
             try
             {
-                Player player = await this._gameRequestService.AcceptGameRequest(requestId);
+                Player player = await _gameRequestService.AcceptGameRequest(requestId);
+
                 var playerDto = new PlayerDTO
                 {
                     Id = player.Id,
-                    UserId = player.User.Id,
-                    GameId = player.Game.Id
+                    UserId = player.UserId,
+                    Username = player.User.Username,
+                    GameId = player.GameId
                 };
+
                 return Ok(playerDto);
             }
             catch (Exception e)
@@ -52,20 +54,20 @@ namespace CandyGrabberApi.Controllers
                 return BadRequest(e.Message);
             }
         }
-        [Route("DeleteGameRequest/{requestId}")]
-        [HttpDelete]
-        public async Task<IActionResult> DeleteGameRequest(int requestId)
-        {
-            try
-            {
-                await this._gameRequestService.DeleteGameRequests(requestId);
-                return Ok();
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
+        //[Route("DeleteGameRequest/{requestId}")]
+        //[HttpDelete]
+        //public async Task<IActionResult> DeleteGameRequest(int requestId)
+        //{
+        //    try
+        //    {
+        //        await this._gameRequestService.DeleteGameRequests(requestId);
+        //        return Ok();
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        return BadRequest(e.Message);
+        //    }
+        //}
         [Route("DeclineGameRequest/{requestId}")]
         [HttpDelete]
         public async Task<IActionResult> DeclineGameRequest(int requestId)
