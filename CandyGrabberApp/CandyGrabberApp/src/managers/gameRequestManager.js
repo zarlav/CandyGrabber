@@ -1,44 +1,36 @@
 export class GameRequestManager {
-
     constructor(baseUrl) {
         this.baseUrl = baseUrl;
     }
 
-async send(request) {
-    const response = await fetch(
-        `${this.baseUrl}GameRequest/SendGameRequest`,
-        {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(request)
+    async send(request) {
+        const response = await fetch(
+            `${this.baseUrl}GameRequest/SendGameRequest`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(request)
+            }
+        );
+
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(text);
         }
-    );
 
-    if (!response.ok) {
+        return await response.json();
+    }
+
+    async getByRecipient(recipientId) {
+        const response = await fetch(
+            `${this.baseUrl}GameRequest/GetAllGameRequestByRecipientId/${recipientId}`
+        );
+
+        if (!response.ok) throw new Error("Failed to load game requests");
+
         const text = await response.text();
-        throw new Error(text);
+        return text ? JSON.parse(text) : [];
     }
-
-    return await response.json();
-}
-
-async getByRecipient(recipientId) {
-    console.log("getByRecipient called with:", recipientId); 
-    const response = await fetch(
-        `${this.baseUrl}GameRequest/GetAllGameRequestByRecipientId/${recipientId}`
-    );
-
-    if (!response.ok) {
-        throw new Error("Failed to load requests");
-    }
-
-    const text = await response.text();
-    console.log("Response text:", text); 
-
-    return text ? JSON.parse(text) : [];
-}
-
-
 
     async accept(requestId) {
         const response = await fetch(

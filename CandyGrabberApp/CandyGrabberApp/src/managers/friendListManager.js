@@ -1,32 +1,30 @@
 export class FriendListManager {
-    constructor(baseUrl)
-    {
+    constructor(baseUrl) {
         this.baseUrl = baseUrl;
     }
-async getFriendList(userId)
-{
-    const response = await fetch(`${this.baseUrl}FriendsList/GetAllFriends/${userId}`);
 
-    if(!response.ok)
-    {
-        throw new Error("Failed to load friend list");
+    async getFriendList(userId) {
+        try {
+            const response = await fetch(`${this.baseUrl}FriendsList/GetAllFriends/${userId}`);
+            if (!response.ok) throw new Error("Failed to load friend list");
+
+            const text = await response.text();
+            return text ? JSON.parse(text) : [];
+        } catch (err) {
+            console.error("FriendListManager.getFriendList:", err);
+            return [];
+        }
     }
 
-    const text = await response.text();
+    async checkIfFriends(UserName, FriendName) {
+        try {
+            const response = await fetch(`${this.baseUrl}FriendsList/CheckIfFriendRequestSent/${UserName}/${FriendName}`);
+            if (!response.ok) throw new Error("Failed to check friendship");
 
-    return text ? JSON.parse(text) : [];
-
-}
-
-async checkIfFriends(UserName, FriendName)
-{
-    const response = await fetch(`${this.baseUrl}FriendsList/CheckIfFriendRequestSent/${UserName}/${FriendName}`);
-
-    if(!response.ok)
-    {
-        throw new Error("Failed friend checking");
+            return await response.json();
+        } catch (err) {
+            console.error("FriendListManager.checkIfFriends:", err);
+            return false;
+        }
     }
-    const isFriend = await response.json();
-    return isFriend;
-}
 }

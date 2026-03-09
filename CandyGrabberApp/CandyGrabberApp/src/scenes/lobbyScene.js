@@ -9,19 +9,22 @@ import { config } from "../config.js";
 import { connection, startConnection } from "../signalR/connection.js";
 
 export class LobbyScene {
-
     constructor(app) {
         this.app = app;
         this.container = new PIXI.Container();
         this.container.sortableChildren = true;
         this.app.stage.addChild(this.container);
 
-        this.searchResultContainer = new PIXI.Container();
-        this.searchResultContainer.zIndex = 1000;
-        this.container.addChild(this.searchResultContainer);
+        this.requestsContainer = new PIXI.Container();
+        this.requestsContainer.zIndex = 1000;
+        this.container.addChild(this.requestsContainer);
 
         this.friendListContainer = new PIXI.Container();
         this.container.addChild(this.friendListContainer);
+
+        this.searchResultContainer = new PIXI.Container();
+        this.searchResultContainer.zIndex = 2000;
+        this.container.addChild(this.searchResultContainer);
 
         this.currentUserId = Number(authService.getCurrentUserId());
 
@@ -30,33 +33,34 @@ export class LobbyScene {
         this.friendListManager = new FriendListManager(config.apiBaseUrl);
         this.searchManager = new SearchManager(config.apiBaseUrl);
 
+        this.createUI();
         this.initSignalR();
 
-        this.createUI();
-        this.loadRequests(this.currentUserId);
+        this.loadGameRequests(this.currentUserId);
         this.showFriendList(this.currentUserId);
     }
 
     async initSignalR() {
         await startConnection(authService.getCurrentUsername());
 
-        // primanje chat poruka
+        // ---- CHAT MESSAGE EXAMPLE ----
         connection.on("ReceiveMessage", (sender, content) => {
             console.log(`Message from ${sender}: ${content}`);
         });
 
-        // friend request
-        connection.on("FriendRequestSent", (sender) => {
-            console.log(`Friend request from: ${sender}`);
+        // ---- FRIEND REQUEST REAL-TIME ----
+        connection.on("FriendRequestSent", (senderUsername) => {
+            console.log(`Friend request from: ${senderUsername}`);
+            this.addFriendRequestToUI(senderUsername);
         });
 
-        // primanje game requesta u real-time
+        // ---- GAME REQUEST REAL-TIME ----
         connection.on("ReceiveGameRequest", (req) => {
-            console.log("Primljen game request:", req);
+            console.log("Received game request:", req);
             this.addGameRequestToUI(req);
         });
 
-        // pokretanje igre
+        // ---- GAME START REAL-TIME ----
         connection.on("GameStarted", (gameStartDTO) => {
             console.log("Game started:", gameStartDTO);
             this.startGame(gameStartDTO);
@@ -64,6 +68,7 @@ export class LobbyScene {
     }
 
     startGame(game) {
+        // destroy lobby UI
         this.container.destroy({ children: true, texture: true, baseTexture: true });
         import("../scenes/gameScene.js").then(module => {
             new module.GameScene(this.app, game);
@@ -71,18 +76,21 @@ export class LobbyScene {
     }
 
     createUI() {
+        // ---- BACKGROUND ----
         const bg = new PIXI.Graphics();
         bg.beginFill(0x0f172a);
-        bg.drawRect(0, 0, 800, 600);
+        bg.drawRect(0, 0, window.innerWidth, window.innerHeight);
         bg.endFill();
         this.container.addChildAt(bg, 0);
 
+        // ---- TITLE ----
         const title = new PIXI.Text("GAME LOBBY", { fill: 0xffffff, fontSize: 36, fontWeight: "bold" });
         title.anchor.set(0.5);
-        title.x = 400;
+        title.x = window.innerWidth / 2;
         title.y = 50;
         this.container.addChild(title);
 
+        // ---- LEFT PANEL (REQUESTS) ----
         this.leftPanel = new PIXI.Container();
         this.leftPanel.x = 20;
         this.leftPanel.y = 140;
@@ -94,15 +102,10 @@ export class LobbyScene {
         requestsPanel.endFill();
         this.leftPanel.addChild(requestsPanel);
 
-        const requestsTitle = new PIXI.Text("Game Requests", { fill: 0xffffff, fontSize: 18, fontWeight: "bold" });
+        const requestsTitle = new PIXI.Text("Requests", { fill: 0xffffff, fontSize: 18, fontWeight: "bold" });
         requestsTitle.x = 20;
         requestsTitle.y = 10;
         this.leftPanel.addChild(requestsTitle);
-
-        this.requestsContainer = new PIXI.Container();
-        this.requestsContainer.x = 10;
-        this.requestsContainer.y = 50;
-        this.leftPanel.addChild(this.requestsContainer);
 
         const meText = new PIXI.Text(`Logged ID: ${this.currentUserId}`, { fill: 0x38bdf8, fontSize: 18 });
         meText.x = 70;
@@ -116,15 +119,9 @@ export class LobbyScene {
         this.searchInput = document.createElement("input");
         this.searchInput.placeholder = "Enter username...";
         this.searchInput.type = "text";
-
-        const inputWidth = 200;
-        const gap = 10;
-        const buttonWidth = 80;
-        const topOffset = 20;
-
         this.searchInput.style.cssText = `
             position:absolute;
-            width:${inputWidth}px;
+            width:200px;
             padding:8px;
             border-radius:8px;
             border:none;
@@ -139,7 +136,7 @@ export class LobbyScene {
             if (!this.searchInput.value.trim()) this.searchResultContainer.removeChildren();
         });
 
-        const searchBtn = new Button("Search", 0, topOffset, async () => {
+        const searchBtn = new Button("Search", 0, 20, async () => {
             const username = this.searchInput.value.trim();
             if (!username) return;
             try {
@@ -154,21 +151,20 @@ export class LobbyScene {
         this.container.addChild(searchBtn.container);
 
         const updateSearchLayout = () => {
-            const inputLeft = window.innerWidth - inputWidth - buttonWidth - gap - 20;
+            const inputLeft = window.innerWidth - 200 - 80 - 10 - 20;
             this.searchInput.style.left = inputLeft + "px";
-            this.searchInput.style.top = topOffset + "px";
-            searchBtn.container.x = inputLeft + inputWidth + gap;
-            searchBtn.container.y = topOffset;
+            this.searchInput.style.top = 20 + "px";
+            searchBtn.container.x = inputLeft + 200 + 10;
+            searchBtn.container.y = 20;
         };
-
         updateSearchLayout();
         window.addEventListener("resize", updateSearchLayout);
     }
 
-    async loadRequests(recipientId) {
-        if (!recipientId) return;
-
-        const requests = await this.gameRequestManager.getByRecipient(recipientId);
+    // ------------------ GAME REQUEST UI ------------------
+    async loadGameRequests(userId) {
+        if (!userId) return;
+        const requests = await this.gameRequestManager.getByRecipient(userId);
         this.requestsContainer.removeChildren();
 
         let y = 0;
@@ -179,7 +175,7 @@ export class LobbyScene {
     }
 
     addGameRequestToUI(req, yOffset = null) {
-        let y = yOffset !== null ? yOffset : this.requestsContainer.children.length * 100;
+        const y = yOffset !== null ? yOffset : this.requestsContainer.children.length * 100;
 
         const card = new PIXI.Graphics();
         card.beginFill(0x1e293b);
@@ -209,10 +205,55 @@ export class LobbyScene {
         this.requestsContainer.addChild(declineBtn.container);
     }
 
-    async showFriendList(currentUserId) {
-        if (!currentUserId) return;
+    // ------------------ FRIEND REQUEST UI ------------------
+    async addFriendRequestToUI(senderUsername) {
+        const y = this.requestsContainer.children.length * 100;
 
-        const friendships = await this.friendListManager.getFriendList(currentUserId);
+        const card = new PIXI.Graphics();
+        card.beginFill(0x1e293b);
+        card.drawRoundedRect(0, y, 230, 80, 12);
+        card.endFill();
+
+        const text = new PIXI.Text(`${senderUsername} sent you a friend request`, { fill: 0xffffff, fontSize: 14 });
+        text.x = 10;
+        text.y = y + 10;
+
+        const acceptBtn = new Button("Accept", 10, y + 45, async () => {
+            const requests = await this.friendRequestManager.getByRecipient(this.currentUserId);
+            const req = requests.find(r => r.senderUsername === senderUsername);
+            if (!req) return;
+
+            await this.friendRequestManager.accept(req.id);
+            card.destroy();
+            text.destroy();
+            acceptBtn.container.destroy();
+            declineBtn.container.destroy();
+
+            this.showFriendList(this.currentUserId);
+        });
+
+        const declineBtn = new Button("Decline", 110, y + 45, async () => {
+            const requests = await this.friendRequestManager.getByRecipient(this.currentUserId);
+            const req = requests.find(r => r.senderUsername === senderUsername);
+            if (!req) return;
+
+            await this.friendRequestManager.decline(req.id);
+            card.destroy();
+            text.destroy();
+            acceptBtn.container.destroy();
+            declineBtn.container.destroy();
+        });
+
+        this.requestsContainer.addChild(card);
+        this.requestsContainer.addChild(text);
+        this.requestsContainer.addChild(acceptBtn.container);
+        this.requestsContainer.addChild(declineBtn.container);
+    }
+
+    // ------------------ FRIEND LIST UI ------------------
+    async showFriendList(userId) {
+        if (!userId) return;
+        const friendships = await this.friendListManager.getFriendList(userId);
         this.friendListContainer.removeChildren();
 
         const inputLeft = parseInt(this.searchInput.style.left);
@@ -234,8 +275,8 @@ export class LobbyScene {
         startY += 10;
 
         friendships.forEach(f => {
-            const friendUser = f.userId === currentUserId ? f.friend : f.user;
-            const recipientId = f.userId === currentUserId ? f.friendId : f.userId;
+            const friendUser = f.userId === userId ? f.friend : f.user;
+            const recipientId = f.userId === userId ? f.friendId : f.userId;
 
             const card = new PIXI.Graphics();
             card.beginFill(0x1e293b);
@@ -250,21 +291,15 @@ export class LobbyScene {
             nameText.y = startY + 15;
 
             const inviteBtn = new Button("Invite", inputLeft + 210, startY + 10, async () => {
-                try {
-                    const request = {
-                        senderId: this.currentUserId,
-                        recipientId: recipientId,
-                        timestamp: new Date().toISOString()
-                    };
-
-                    await this.gameRequestManager.send(request);
-
-                    inviteBtn.setText("Sent");
-                    inviteBtn.container.interactive = false;
-                    inviteBtn.container.alpha = 0.6;
-                } catch (err) {
-                    console.error(err);
-                }
+                const request = {
+                    senderId: this.currentUserId,
+                    recipientId: recipientId,
+                    timestamp: new Date().toISOString()
+                };
+                await this.gameRequestManager.send(request);
+                inviteBtn.setText("Sent");
+                inviteBtn.container.interactive = false;
+                inviteBtn.container.alpha = 0.6;
             });
 
             this.friendListContainer.addChild(card);
@@ -275,6 +310,7 @@ export class LobbyScene {
         });
     }
 
+    // ------------------ SEARCH RESULT ------------------
     showSearchResult(user) {
         this.searchResultContainer.removeChildren();
         if (!this.searchInput.value.trim()) return;
@@ -309,29 +345,22 @@ export class LobbyScene {
             `${user.name} ${user.lastName}\nUsername: ${user.username}\nWins: ${user.gamesWon} : Losses: ${user.gamesLost}`,
             { fill: 0xffffff, fontSize: 16, lineHeight: 24 }
         );
-
         infoText.x = card.x + 20;
         infoText.y = card.y + 20;
 
         const requestBtn = new Button("Add friend", card.x + cardWidth / 2 - 60, card.y + cardHeight - 40, async () => {
-            try {
-                const request = {
-                    userId: this.currentUserId,
-                    friendUsername: user.username
-                };
-                await this.friendRequestManager.send(request);
-
-                requestBtn.setText("Sent");
-                requestBtn.container.interactive = false;
-                requestBtn.container.alpha = 0.6;
-            } catch (err) {
-                console.error(err);
-            }
+            const request = {
+                userId: this.currentUserId,
+                friendUsername: user.username
+            };
+            await this.friendRequestManager.send(request);
+            requestBtn.setText("Sent");
+            requestBtn.container.interactive = false;
+            requestBtn.container.alpha = 0.6;
         });
 
         this.searchResultContainer.addChild(card);
         this.searchResultContainer.addChild(infoText);
         this.searchResultContainer.addChild(requestBtn.container);
     }
-
 }
