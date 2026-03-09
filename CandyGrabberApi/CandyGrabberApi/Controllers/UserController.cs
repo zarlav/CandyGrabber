@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CandyGrabberApi.Controllers
 {
-  //  [Authorize]
     [Route("User")]
     [ApiController]
     public class UserController : ControllerBase
@@ -23,6 +22,28 @@ namespace CandyGrabberApi.Controllers
         }
 
         [AllowAnonymous]
+        [HttpGet("stats/{userId}")]
+        public async Task<IActionResult> GetStats(int userId)
+        {
+            try
+            {
+                var user = (await _unitOfWork.User.FindAsync(u => u.Id == userId)).FirstOrDefault();
+                if (user == null) return NotFound("Korisnik nije pronađen.");
+
+                return Ok(new
+                {
+                    username = user.Username,
+                    wins = user.GamesWon,
+                    losses = user.GamesLost
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [AllowAnonymous]
         [Route("Register")]
         [HttpPost]
         public async Task<IActionResult> Register([FromForm] UserRegisterDTO user)
@@ -32,11 +53,9 @@ namespace CandyGrabberApi.Controllers
                 var result = await this._userService.Register(user);
                 return Created("success", result);
             }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            catch (Exception e) { return BadRequest(e.Message); }
         }
+
         [AllowAnonymous]
         [Route("Login")]
         [HttpPost]
@@ -45,10 +64,7 @@ namespace CandyGrabberApi.Controllers
             try
             {
                 var token = await _userService.Login(userDto.Username, userDto.Password);
-
-                var user = (await _unitOfWork.User
-                    .FindAsync(u => u.Username == userDto.Username))
-                    .FirstOrDefault();
+                var user = (await _unitOfWork.User.FindAsync(u => u.Username == userDto.Username)).FirstOrDefault();
 
                 Response.Cookies.Append("jwt", token, new CookieOptions
                 {
@@ -57,18 +73,11 @@ namespace CandyGrabberApi.Controllers
                     SameSite = SameSiteMode.None
                 });
 
-                return Ok(new
-                {
-                    Id = user.Id,
-                    Username = user.Username,
-                    Token = token
-                });
+                return Ok(new { Id = user.Id, Username = user.Username, Token = token });
             }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            catch (Exception e) { return BadRequest(e.Message); }
         }
+
         [Route("UpdateProfile")]
         [HttpPut]
         public async Task<IActionResult> UpdateProfile([FromForm] UserUpdateDTO user)
@@ -78,10 +87,7 @@ namespace CandyGrabberApi.Controllers
                 await this._userService.UpdateProfile(user);
                 return Ok(user);
             }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            catch (Exception e) { return BadRequest(e.Message); }
         }
 
         [AllowAnonymous]
@@ -89,18 +95,13 @@ namespace CandyGrabberApi.Controllers
         public async Task<IActionResult> GetUser()
         {
             var jwt = Request.Cookies["jwt"];
-            if (string.IsNullOrEmpty(jwt))
-                return Ok(null); 
-
+            if (string.IsNullOrEmpty(jwt)) return Ok(null);
             try
             {
                 var user = await _userService.GetUser(jwt);
                 return Ok(user);
             }
-            catch
-            {
-                return Unauthorized();
-            }
+            catch { return Unauthorized(); }
         }
 
         [Route("Logout")]
@@ -108,9 +109,9 @@ namespace CandyGrabberApi.Controllers
         public async Task<IActionResult> Logout()
         {
             Response.Cookies.Delete("jwt", new CookieOptions { SameSite = SameSiteMode.None, Secure = true });
-
             return Ok(new { message = "success" });
         }
+
         [AllowAnonymous]
         [Route("Search/{username}/{ownerUsername}")]
         [HttpGet]
@@ -119,14 +120,11 @@ namespace CandyGrabberApi.Controllers
             try
             {
                 var users = await this._userService.Search(username, ownerUsername);
-
                 return Ok(users);
             }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            catch (Exception e) { return BadRequest(e.Message); }
         }
+
         [AllowAnonymous]
         [Route("GetUserByUsername/{username}")]
         [HttpGet]
@@ -135,20 +133,16 @@ namespace CandyGrabberApi.Controllers
             try
             {
                 var users = await this._userService.GetUserByUsername(username);
-
                 return Ok(users);
             }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            catch (Exception e) { return BadRequest(e.Message); }
         }
+
         [Route("Lose/{userId}")]
         [HttpPost]
         public async Task<IActionResult> Lose(int userId)
         {
             await this._userService.IncrementLose(userId);
-
             return Ok();
         }
     }

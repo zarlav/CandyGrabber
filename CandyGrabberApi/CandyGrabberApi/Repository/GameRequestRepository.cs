@@ -6,26 +6,37 @@ namespace CandyGrabberApi.Repository
 {
     public class GameRequestRepository : Repository<GameRequest>, IGameRequestRepository
     {
-        private CandyGrabberContext _db;
+        private readonly CandyGrabberContext _db;
+
         public GameRequestRepository(CandyGrabberContext db) : base(db)
         {
             _db = db;
         }
-        public async Task<GameRequest> GetGameRequestBySenderAndRecipient(int SenderId, int RecipientId)
+
+        public async Task<GameRequest?> GetGameRequestBySenderAndRecipient(int senderId, int recipientId)
         {
-            var request = await _db.GameRequest.Where(x => x.SenderId == SenderId && x.RecipientId == RecipientId).FirstOrDefaultAsync();
-            return request;
+
+            return await _db.GameRequest
+                .Include(x => x.Sender)
+                .Include(x => x.Recipient)
+                .Where(x => x.SenderId == senderId && x.RecipientId == recipientId)
+                .OrderByDescending(x => x.TimeStamp)
+                .FirstOrDefaultAsync();
         }
 
-        public async Task<GameRequest> GetGameRequestById(int gameRequestId)
+        public async Task<GameRequest?> GetGameRequestById(int gameRequestId)
         {
-            var request = await _db.GameRequest.Where(x => x.Id == gameRequestId).FirstOrDefaultAsync();
-            return request;
+            return await _db.GameRequest
+                .Include(x => x.Sender)
+                .Include(x => x.Recipient)
+                .Where(x => x.Id == gameRequestId)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<List<GameRequest>> GetAllGameRequestByRecipientId(int recipientId)
         {
-            var thresholdTimeUtc = DateTime.UtcNow.AddSeconds(-200);
+
+            var thresholdTimeUtc = DateTime.UtcNow.AddMinutes(-15);
 
             return await _db.GameRequest
                 .Include(x => x.Sender)
@@ -33,8 +44,8 @@ namespace CandyGrabberApi.Repository
                 .Where(x => x.RecipientId == recipientId
                             && x.GameRequestStatus == Domain.Enums.GameRequestStatus.SENT
                             && x.TimeStamp > thresholdTimeUtc)
+                .OrderByDescending(x => x.TimeStamp) 
                 .ToListAsync();
         }
-
     }
 }

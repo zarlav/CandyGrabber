@@ -26,7 +26,8 @@ export class LobbyScene {
         this.searchResultContainer.zIndex = 2000;
         this.container.addChild(this.searchResultContainer);
 
-        this.currentUserId = Number(authService.getCurrentUserId());
+        this.currentUserId = authService.getCurrentUserId();
+        this.currentUsername = authService.getCurrentUsername();
 
         this.gameRequestManager = new GameRequestManager(config.apiBaseUrl);
         this.friendRequestManager = new FriendRequestManager(config.apiBaseUrl);
@@ -35,332 +36,289 @@ export class LobbyScene {
 
         this.createUI();
         this.initSignalR();
+        this.loadInitialData();
 
-        this.loadGameRequests(this.currentUserId);
-        this.showFriendList(this.currentUserId);
+        this.refreshInterval = setInterval(() => {
+            this.loadInitialData();
+        }, 3000);
     }
 
     async initSignalR() {
-        await startConnection(authService.getCurrentUsername());
+        if (!connection || connection.state !== "Connected") {
+            await startConnection(this.currentUsername);
+        }
 
-        // ---- CHAT MESSAGE EXAMPLE ----
-        connection.on("ReceiveMessage", (sender, content) => {
-            console.log(`Message from ${sender}: ${content}`);
-        });
-
-        // ---- FRIEND REQUEST REAL-TIME ----
-        connection.on("FriendRequestSent", (senderUsername) => {
-            console.log(`Friend request from: ${senderUsername}`);
-            this.addFriendRequestToUI(senderUsername);
-        });
-
-        // ---- GAME REQUEST REAL-TIME ----
-        connection.on("ReceiveGameRequest", (req) => {
-            console.log("Received game request:", req);
-            this.addGameRequestToUI(req);
-        });
-
-        // ---- GAME START REAL-TIME ----
-        connection.on("GameStarted", (gameStartDTO) => {
-            console.log("Game started:", gameStartDTO);
-            this.startGame(gameStartDTO);
-        });
-    }
-
-    startGame(game) {
-        // destroy lobby UI
-        this.container.destroy({ children: true, texture: true, baseTexture: true });
-        import("../scenes/gameScene.js").then(module => {
-            new module.GameScene(this.app, game);
-        });
+        connection.on("ReceiveGameRequest", (req) => { this.loadInitialData(); });
+        connection.on("FriendRequestSent", (senderUsername) => { this.addFriendRequestToUI(senderUsername); });
+        connection.on("GameStarted", (gameStartDTO) => { this.startGame(gameStartDTO); });
     }
 
     createUI() {
-        // ---- BACKGROUND ----
-        const bg = new PIXI.Graphics();
-        bg.beginFill(0x0f172a);
-        bg.drawRect(0, 0, window.innerWidth, window.innerHeight);
-        bg.endFill();
+        const sw = this.app.screen.width;
+        const sh = this.app.screen.height;
+        
+        // 1. POZADINA I GRID
+        const bg = new PIXI.Graphics().rect(0, 0, sw, sh).fill(0x020617);
         this.container.addChildAt(bg, 0);
 
-        // ---- TITLE ----
-        const title = new PIXI.Text("GAME LOBBY", { fill: 0xffffff, fontSize: 36, fontWeight: "bold" });
-        title.anchor.set(0.5);
-        title.x = window.innerWidth / 2;
-        title.y = 50;
+        const grid = new PIXI.Graphics();
+        for (let i = 0; i < sw; i += 60) { grid.moveTo(i, 0).lineTo(i, sh); }
+        for (let i = 0; i < sh; i += 60) { grid.moveTo(0, i).lineTo(sw, i); }
+        grid.stroke({ width: 1, color: 0x38bdf8, alpha: 0.05 });
+        this.container.addChildAt(grid, 1);
+
+        // 2. HEADER BAR
+        const header = new PIXI.Graphics()
+            .rect(0, 0, sw, 80)
+            .fill({ color: 0x0f172a, alpha: 0.8 })
+            .stroke({ width: 2, color: 0x38bdf8, alpha: 0.2 });
+        this.container.addChild(header);
+
+        // ISPRAVLJENO: "ULOGOVAN KAO:"
+        const userLabel = new PIXI.Text({ 
+            text: `ULOGOVAN KAO: ${this.currentUsername.toUpperCase()}`, 
+            style: { 
+                fill: "#38bdf8", 
+                fontSize: 13, 
+                fontWeight: "bold", 
+                fontFamily: "Orbitron",
+                letterSpacing: 1.5
+            } 
+        });
+        userLabel.x = 25; userLabel.y = 15;
+        this.container.addChild(userLabel);
+
+        const profileBtn = new Button("PROFIL", 25, 40, () => {
+            window.dispatchEvent(new CustomEvent("openProfile", { detail: this.currentUserId }));
+        });
+        this.container.addChild(profileBtn.container);
+
+        // ISPRAVLJENO: Naslov sada koristi Orbitron (kao na Login stranici)
+        const title = new PIXI.Text({ 
+            text: "CANDY GRABBER LOBBY", 
+            style: { 
+                fill: "#ffffff", 
+                fontSize: 28, 
+                fontWeight: "bold", 
+                fontFamily: "Orbitron", // Identičan font kao na login-u
+                letterSpacing: 3,
+                dropShadow: { alpha: 0.6, blur: 12, color: '#38bdf8', distance: 0 }
+            } 
+        });
+        title.anchor.set(0.5); title.x = sw / 2; title.y = 40;
         this.container.addChild(title);
 
-        // ---- LEFT PANEL (REQUESTS) ----
-        this.leftPanel = new PIXI.Container();
-        this.leftPanel.x = 20;
-        this.leftPanel.y = 140;
-        this.container.addChild(this.leftPanel);
+        // 3. LEVI PANEL (NOTIFIKACIJE)
+        const leftPanel = new PIXI.Graphics()
+            .roundRect(20, 100, 280, 500, 16)
+            .fill({ color: 0x111827, alpha: 0.9 })
+            .stroke({ width: 2, color: 0x334155 });
+        this.container.addChildAt(leftPanel, 2);
 
-        const requestsPanel = new PIXI.Graphics();
-        requestsPanel.beginFill(0x111827);
-        requestsPanel.drawRoundedRect(0, 0, 250, 420, 16);
-        requestsPanel.endFill();
-        this.leftPanel.addChild(requestsPanel);
-
-        const requestsTitle = new PIXI.Text("Requests", { fill: 0xffffff, fontSize: 18, fontWeight: "bold" });
-        requestsTitle.x = 20;
-        requestsTitle.y = 10;
-        this.leftPanel.addChild(requestsTitle);
-
-        const meText = new PIXI.Text(`Logged ID: ${this.currentUserId}`, { fill: 0x38bdf8, fontSize: 18 });
-        meText.x = 70;
-        meText.y = 120;
-        this.container.addChild(meText);
+        const leftTitle = new PIXI.Text({
+            text: "NOTIFIKACIJE",
+            style: { fontFamily: 'Orbitron', fill: '#64748b', fontSize: 12, letterSpacing: 2 }
+        });
+        leftTitle.x = 40; leftTitle.y = 115;
+        this.container.addChild(leftTitle);
 
         this.createSearchUI();
     }
 
     createSearchUI() {
+        if (this.searchInput) this.searchInput.remove();
         this.searchInput = document.createElement("input");
-        this.searchInput.placeholder = "Enter username...";
-        this.searchInput.type = "text";
+        this.searchInput.placeholder = "PRETRAGA IGRAČA...";
         this.searchInput.style.cssText = `
-            position:absolute;
-            width:200px;
-            padding:8px;
-            border-radius:8px;
-            border:none;
-            outline:none;
-            font-size:14px;
-            background:#334155;
-            color:white;
+            position:fixed; width:180px; padding:10px; border-radius:8px; 
+            background:#0f172a; color:#38bdf8; border:1px solid #334155; 
+            z-index:999; font-family:'Rajdhani'; font-weight:bold; letter-spacing:1px;
+            outline:none; transition: all 0.2s;
         `;
+        this.searchInput.onfocus = () => this.searchInput.style.borderColor = "#38bdf8";
+        this.searchInput.onblur = () => this.searchInput.style.borderColor = "#334155";
         document.body.appendChild(this.searchInput);
 
-        this.searchInput.addEventListener("input", () => {
-            if (!this.searchInput.value.trim()) this.searchResultContainer.removeChildren();
+        const searchBtn = new Button("TRAŽI", 0, 0, async () => {
+            const user = await this.searchManager.search(this.searchInput.value.trim(), this.currentUsername);
+            this.showSearchResult(user);
+        });
+        this.container.addChild(searchBtn.container);
+
+        this.layoutUpdate = () => {
+            const rect = this.app.canvas.getBoundingClientRect();
+            this.searchInput.style.left = (rect.left + this.app.screen.width - 320) + "px";
+            this.searchInput.style.top = (rect.top + 22) + "px";
+            searchBtn.container.x = this.app.screen.width - 120;
+            searchBtn.container.y = 22;
+        };
+        this.layoutUpdate();
+        window.addEventListener("resize", this.layoutUpdate);
+    }
+
+    async showFriendList(userId) {
+        const friendships = await this.friendListManager.getFriendList(userId);
+        this.friendListContainer.removeChildren();
+        const panelX = this.app.screen.width - 340;
+        
+        const panel = new PIXI.Graphics()
+            .roundRect(panelX, 100, 320, 500, 16)
+            .fill({ color: 0x111827, alpha: 0.9 })
+            .stroke({ width: 2, color: 0x334155 });
+        this.friendListContainer.addChild(panel);
+
+        const listTitle = new PIXI.Text({
+            text: "LISTA PRIJATELJA",
+            style: { fontFamily: 'Orbitron', fill: '#64748b', fontSize: 12, letterSpacing: 2 }
+        });
+        listTitle.x = panelX + 20; listTitle.y = 115;
+        this.friendListContainer.addChild(listTitle);
+
+        let displayIndex = 0;
+        friendships.forEach((f) => {
+            const isInitiator = String(f.userId) === String(userId);
+            const targetUsername = isInitiator ? f.friend.username : f.user.username;
+            if (targetUsername === this.currentUsername) return; 
+
+            const y = 160 + (displayIndex * 70);
+            
+            const itemBg = new PIXI.Graphics()
+                .roundRect(panelX + 10, y - 10, 300, 60, 8)
+                .fill({ color: 0x1e293b, alpha: 0.5 });
+            
+            const name = new PIXI.Text({ 
+                text: targetUsername, 
+                style: { fill: "#ffffff", fontSize: 16, fontFamily: 'Rajdhani', fontWeight: 'bold' } 
+            });
+            name.x = panelX + 25; name.y = y + 8;
+
+            // ISPRAVLJENO: Invite dugme pomereno unutra (x: panelX + 180) da ne štrči
+            const inviteBtn = new Button("INVITE", panelX + 180, y, async () => {
+                try {
+                    await connection.invoke("SendGameRequest", this.currentUsername, targetUsername);
+                } catch (e) { console.error(e); }
+            });
+
+            this.friendListContainer.addChild(itemBg, name, inviteBtn.container);
+            displayIndex++;
+        });
+    }
+
+    async loadInitialData() {
+        try {
+            const gameRequests = await this.gameRequestManager.getByRecipient(this.currentUserId);
+            const currentHash = JSON.stringify(gameRequests);
+            if (this.lastDataHash === currentHash) return;
+            this.lastDataHash = currentHash;
+
+            this.requestsContainer.removeChildren();
+
+            if (gameRequests && Array.isArray(gameRequests)) {
+                gameRequests.forEach(req => {
+                    const sId = req.senderId || req.sender?.id;
+                    const sName = req.sender?.username || req.senderUsername;
+                    if (sId == this.currentUserId) return; 
+
+                    this.addGameRequestToUI({ id: req.id, username: sName || "Nepoznat igrač" });
+                });
+            }
+            await this.showFriendList(this.currentUserId);
+        } catch (err) { console.error("LobbyScene load error:", err); }
+    }
+
+    addGameRequestToUI(req) {
+        const y = this.requestsContainer.children.length * 100;
+        const container = new PIXI.Container();
+        container.x = 40; container.y = 140 + y;
+
+        const card = new PIXI.Graphics()
+            .roundRect(0, 0, 240, 90, 12)
+            .fill(0x1e293b)
+            .stroke({ width: 2, color: 0x22c55e, alpha: 0.5 });
+        
+        const text = new PIXI.Text({ 
+            text: `POZIV: ${req.username.toUpperCase()}`, 
+            style: { fill: "#4ade80", fontSize: 12, fontFamily: 'Orbitron', fontWeight: 'bold' } 
+        });
+        text.x = 15; text.y = 15;
+
+        const acceptBtn = new Button("IGRAJ", 15, 45, async () => {
+            try {
+                await this.gameRequestManager.accept(req.id);
+                await connection.invoke("SendGameRequestAccepted", req.id, this.currentUsername, req.username);
+            } catch (err) { console.error(err); }
         });
 
-        const searchBtn = new Button("Search", 0, 20, async () => {
-            const username = this.searchInput.value.trim();
-            if (!username) return;
-            try {
-                const user = await this.searchManager.search(username);
-                this.showSearchResult(user);
-            } catch (err) {
-                console.error(err);
-                this.showSearchResult(null);
+        container.addChild(card, text, acceptBtn.container);
+        this.requestsContainer.addChild(container);
+    }
+
+    addFriendRequestToUI(senderUsername) {
+        const y = this.requestsContainer.children.length * 100;
+        const container = new PIXI.Container();
+        container.x = 40; container.y = 140 + y;
+
+        const card = new PIXI.Graphics()
+            .roundRect(0, 0, 240, 90, 12)
+            .fill(0x1e293b)
+            .stroke({ width: 2, color: 0x38bdf8, alpha: 0.5 });
+        
+        const text = new PIXI.Text({ 
+            text: `ZAHTEV: ${senderUsername}`, 
+            style: { fill: "#38bdf8", fontSize: 12, fontFamily: 'Orbitron' } 
+        });
+        text.x = 15; text.y = 15;
+
+        const acceptBtn = new Button("PRIHVATI", 15, 45, async () => {
+            const requests = await this.friendRequestManager.getByRecipient(this.currentUsername);
+            const req = requests.find(r => r.senderUsername === senderUsername);
+            if (req) {
+                await this.friendRequestManager.accept(req.id);
+                container.destroy();
+                this.showFriendList(this.currentUserId);
             }
         });
 
-        this.container.addChild(searchBtn.container);
-
-        const updateSearchLayout = () => {
-            const inputLeft = window.innerWidth - 200 - 80 - 10 - 20;
-            this.searchInput.style.left = inputLeft + "px";
-            this.searchInput.style.top = 20 + "px";
-            searchBtn.container.x = inputLeft + 200 + 10;
-            searchBtn.container.y = 20;
-        };
-        updateSearchLayout();
-        window.addEventListener("resize", updateSearchLayout);
+        container.addChild(card, text, acceptBtn.container);
+        this.requestsContainer.addChild(container);
     }
 
-    // ------------------ GAME REQUEST UI ------------------
-    async loadGameRequests(userId) {
-        if (!userId) return;
-        const requests = await this.gameRequestManager.getByRecipient(userId);
-        this.requestsContainer.removeChildren();
-
-        let y = 0;
-        requests.forEach(req => {
-            this.addGameRequestToUI(req, y);
-            y += 100;
-        });
-    }
-
-    addGameRequestToUI(req, yOffset = null) {
-        const y = yOffset !== null ? yOffset : this.requestsContainer.children.length * 100;
-
-        const card = new PIXI.Graphics();
-        card.beginFill(0x1e293b);
-        card.drawRoundedRect(0, y, 230, 80, 12);
-        card.endFill();
-
-        const text = new PIXI.Text(`${req.username ?? req.sender.username} wants to play`, { fill: 0xffffff, fontSize: 14 });
-        text.x = 10;
-        text.y = y + 10;
-
-        const acceptBtn = new Button("Accept", 10, y + 45, async () => {
-            const game = await this.gameRequestManager.accept(req.senderId ?? req.id);
-            this.startGame(game);
-        });
-
-        const declineBtn = new Button("Decline", 110, y + 45, async () => {
-            await this.gameRequestManager.decline(req.senderId ?? req.id);
-            card.destroy();
-            text.destroy();
-            acceptBtn.container.destroy();
-            declineBtn.container.destroy();
-        });
-
-        this.requestsContainer.addChild(card);
-        this.requestsContainer.addChild(text);
-        this.requestsContainer.addChild(acceptBtn.container);
-        this.requestsContainer.addChild(declineBtn.container);
-    }
-
-    // ------------------ FRIEND REQUEST UI ------------------
-    async addFriendRequestToUI(senderUsername) {
-        const y = this.requestsContainer.children.length * 100;
-
-        const card = new PIXI.Graphics();
-        card.beginFill(0x1e293b);
-        card.drawRoundedRect(0, y, 230, 80, 12);
-        card.endFill();
-
-        const text = new PIXI.Text(`${senderUsername} sent you a friend request`, { fill: 0xffffff, fontSize: 14 });
-        text.x = 10;
-        text.y = y + 10;
-
-        const acceptBtn = new Button("Accept", 10, y + 45, async () => {
-            const requests = await this.friendRequestManager.getByRecipient(this.currentUserId);
-            const req = requests.find(r => r.senderUsername === senderUsername);
-            if (!req) return;
-
-            await this.friendRequestManager.accept(req.id);
-            card.destroy();
-            text.destroy();
-            acceptBtn.container.destroy();
-            declineBtn.container.destroy();
-
-            this.showFriendList(this.currentUserId);
-        });
-
-        const declineBtn = new Button("Decline", 110, y + 45, async () => {
-            const requests = await this.friendRequestManager.getByRecipient(this.currentUserId);
-            const req = requests.find(r => r.senderUsername === senderUsername);
-            if (!req) return;
-
-            await this.friendRequestManager.decline(req.id);
-            card.destroy();
-            text.destroy();
-            acceptBtn.container.destroy();
-            declineBtn.container.destroy();
-        });
-
-        this.requestsContainer.addChild(card);
-        this.requestsContainer.addChild(text);
-        this.requestsContainer.addChild(acceptBtn.container);
-        this.requestsContainer.addChild(declineBtn.container);
-    }
-
-    // ------------------ FRIEND LIST UI ------------------
-    async showFriendList(userId) {
-        if (!userId) return;
-        const friendships = await this.friendListManager.getFriendList(userId);
-        this.friendListContainer.removeChildren();
-
-        const inputLeft = parseInt(this.searchInput.style.left);
-        const inputTop = parseInt(this.searchInput.style.top);
-
-        let startY = inputTop + 70;
-
-        const panel = new PIXI.Graphics();
-        panel.beginFill(0x111827);
-        panel.drawRoundedRect(inputLeft, startY - 40, 320, 400, 16);
-        panel.endFill();
-        this.friendListContainer.addChild(panel);
-
-        const title = new PIXI.Text("Friends", { fill: 0xffffff, fontSize: 18, fontWeight: "bold" });
-        title.x = inputLeft + 15;
-        title.y = startY - 35;
-        this.friendListContainer.addChild(title);
-
-        startY += 10;
-
-        friendships.forEach(f => {
-            const friendUser = f.userId === userId ? f.friend : f.user;
-            const recipientId = f.userId === userId ? f.friendId : f.userId;
-
-            const card = new PIXI.Graphics();
-            card.beginFill(0x1e293b);
-            card.drawRoundedRect(inputLeft + 10, startY, 300, 50, 10);
-            card.endFill();
-            card.interactive = true;
-            card.on("pointerover", () => card.tint = 0x2a3b55);
-            card.on("pointerout", () => card.tint = 0xffffff);
-
-            const nameText = new PIXI.Text(friendUser.username, { fill: 0xffffff, fontSize: 16 });
-            nameText.x = inputLeft + 20;
-            nameText.y = startY + 15;
-
-            const inviteBtn = new Button("Invite", inputLeft + 210, startY + 10, async () => {
-                const request = {
-                    senderId: this.currentUserId,
-                    recipientId: recipientId,
-                    timestamp: new Date().toISOString()
-                };
-                await this.gameRequestManager.send(request);
-                inviteBtn.setText("Sent");
-                inviteBtn.container.interactive = false;
-                inviteBtn.container.alpha = 0.6;
-            });
-
-            this.friendListContainer.addChild(card);
-            this.friendListContainer.addChild(nameText);
-            this.friendListContainer.addChild(inviteBtn.container);
-
-            startY += 60;
-        });
-    }
-
-    // ------------------ SEARCH RESULT ------------------
     showSearchResult(user) {
         this.searchResultContainer.removeChildren();
-        if (!this.searchInput.value.trim()) return;
-
-        const cardWidth = 300;
-        const cardHeight = 150;
-
-        const inputLeft = parseInt(this.searchInput.style.left);
-        const inputTop = parseInt(this.searchInput.style.top);
-
-        const cardX = inputLeft + 200 - cardWidth;
-        const cardY = inputTop + 46;
-
-        if (!user) {
-            const notFound = new PIXI.Text("User not found", { fill: 0xff4d4d, fontSize: 20, fontWeight: "bold" });
-            notFound.x = cardX + 80;
-            notFound.y = cardY;
-            this.searchResultContainer.addChild(notFound);
-            return;
-        }
-
-        const card = new PIXI.Graphics();
-        card.beginFill(0x1e293b);
-        card.lineStyle(2, 0x38bdf8);
-        card.drawRoundedRect(0, 0, cardWidth, cardHeight, 16);
-        card.endFill();
-
-        card.x = cardX;
-        card.y = cardY;
-
-        const infoText = new PIXI.Text(
-            `${user.name} ${user.lastName}\nUsername: ${user.username}\nWins: ${user.gamesWon} : Losses: ${user.gamesLost}`,
-            { fill: 0xffffff, fontSize: 16, lineHeight: 24 }
-        );
-        infoText.x = card.x + 20;
-        infoText.y = card.y + 20;
-
-        const requestBtn = new Button("Add friend", card.x + cardWidth / 2 - 60, card.y + cardHeight - 40, async () => {
-            const request = {
-                userId: this.currentUserId,
-                friendUsername: user.username
-            };
-            await this.friendRequestManager.send(request);
-            requestBtn.setText("Sent");
-            requestBtn.container.interactive = false;
-            requestBtn.container.alpha = 0.6;
+        if (!user) return;
+        const sw = this.app.screen.width;
+        
+        const card = new PIXI.Graphics()
+            .roundRect(sw - 340, 100, 320, 160, 16)
+            .fill(0x1e293b)
+            .stroke({ width: 3, color: 0x38bdf8 });
+            
+        const text = new PIXI.Text({ 
+            text: `PRONAĐEN: ${user.username}`, 
+            style: { fill: "#38bdf8", fontFamily: 'Orbitron', fontSize: 14 } 
         });
+        text.x = sw - 315; text.y = 125;
+        
+        const addBtn = new Button("DODAJ", sw - 300, 180, async () => {
+            await connection.invoke("SendFriendRequest", this.currentUsername, user.username);
+            this.searchResultContainer.removeChildren();
+        });
+        
+        this.searchResultContainer.addChild(card, text, addBtn.container);
+    }
 
-        this.searchResultContainer.addChild(card);
-        this.searchResultContainer.addChild(infoText);
-        this.searchResultContainer.addChild(requestBtn.container);
+    startGame(game) {
+        this.cleanup();
+        import("./gameScene.js").then(m => { new m.GameScene(this.app, game); });
+    }
+
+    cleanup() {
+        clearInterval(this.refreshInterval);
+        if (this.searchInput) this.searchInput.remove();
+        window.removeEventListener("resize", this.layoutUpdate);
+        connection.off("ReceiveGameRequest");
+        connection.off("FriendRequestSent");
+        connection.off("GameStarted");
+        this.container.destroy({ children: true });
     }
 }
