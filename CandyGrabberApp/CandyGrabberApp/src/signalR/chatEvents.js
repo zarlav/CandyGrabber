@@ -45,4 +45,13 @@ export function registerSignalREvents() {
         console.log(`Item ${itemIndex} picked`);
         // TODO: ukloni item iz UI
     });
+    connection.on("MatchFinished", (winnerId) => {
+
+    if (String(winnerId) === this.myId)
+        alert("YOU WIN 🏆");
+    else
+        alert("YOU LOSE 💀");
+
+    this.returnToLobby();
+});
 }

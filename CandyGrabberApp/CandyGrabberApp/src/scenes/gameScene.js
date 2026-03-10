@@ -9,10 +9,8 @@ export class GameScene {
         this.app.stage.addChild(this.container);
 
         this.gameId = gameData.gameId || gameData.GameId;
-
         this.player1 = gameData.player1 || gameData.Player1;
         this.player2 = gameData.player2 || gameData.Player2;
-
         this.mazeLayout = gameData.mazeLayout || gameData.MazeLayout;
         this.candiesData = gameData.candies || gameData.Candies;
 
@@ -31,8 +29,9 @@ export class GameScene {
 
         this.initVisuals();
 
-        // prvo osiguramo da je SignalR konekcija startovana
         startConnection(localStorage.getItem("username")).then(() => {
+            connection.invoke("JoinGame", this.gameId);
+
             this.setupSignalREvents();
             this.setupKeyboardControls();
         });
@@ -40,6 +39,7 @@ export class GameScene {
         this.app.ticker.add(this.animateItems, this);
     }
 
+    // ---------- INIT VISUALS ----------
     initVisuals() {
         const sw = this.app.screen.width;
         const sh = this.app.screen.height;
@@ -152,6 +152,7 @@ export class GameScene {
         });
     }
 
+    // ---------- KEYBOARD ----------
     setupKeyboardControls() {
         this._handleKeyDown = e => {
             const me = this.players[this.myId];
@@ -170,7 +171,6 @@ export class GameScene {
                 me.x = gX * this.gridSize + this.gridSize / 2;
                 me.y = gY * this.gridSize + this.gridSize / 2;
 
-                // emituj samo ako konekcija startovana
                 if (connection && connection.state === "Connected") {
                     connection.invoke("PlayerMove", this.gameId, parseInt(this.myId), me.x, me.y);
                 }
@@ -186,16 +186,12 @@ export class GameScene {
         this.items.forEach((item, index) => {
             if (!item.visible) return;
             if (Math.abs(me.x - item.x) < 25 && Math.abs(me.y - item.y) < 25) {
-                item.visible = false;
-                this.scores[this.myId]++;
-                this.updateScoreUI();
-                if (connection && connection.state === "Connected") {
-                    connection.invoke("PickItem", this.gameId, index, parseInt(this.myId));
-                }
+                connection.invoke("PickItem", this.gameId, index, parseInt(this.myId));
             }
         });
     }
 
+    // ---------- UPDATE SCORE & PROGLAŠAVANJE POBEDNIKA ----------
     updateScoreUI() {
         const p1Id = String(this.player1.userId);
         const p2Id = String(this.player2.userId);
@@ -203,11 +199,25 @@ export class GameScene {
         const collected = Object.values(this.scores).reduce((a,b)=>a+b,0);
 
         this.scoreText.text = `CANDIES: ${collected} / ${this.totalCandies}`;
-        this.playerScoreDisplay.text = `${this.player1.username.toUpperCase()}: ${this.scores[p1Id]}  |  ${this.player2.username.toUpperCase()}: ${this.scores[p2Id]}`;
+        this.playerScoreDisplay.text =
+            `${this.player1.username.toUpperCase()}: ${this.scores[p1Id]}  |  ${this.player2.username.toUpperCase()}: ${this.scores[p2Id]}`;
+
+        // CHECK GAME END
+        if (collected === this.totalCandies) {
+            const p1Score = this.scores[p1Id];
+            const p2Score = this.scores[p2Id];
+
+            let winnerId = p1Score > p2Score ? p1Id : p2Id;
+            let loserId = winnerId === p1Id ? p2Id : p1Id;
+
+            // Poziv servera za završetak igre
+            connection.invoke("EndGame", this.gameId, parseInt(winnerId), parseInt(loserId));
+        }
     }
 
+    // ---------- SIGNALR EVENTS ----------
     setupSignalREvents() {
-        // pokreti drugog igraca
+        // Player move
         connection.on("PlayerMoved", (playerId, x, y) => {
             const id = String(playerId);
             if (this.players[id] && id !== this.myId) {
@@ -216,16 +226,66 @@ export class GameScene {
             }
         });
 
-        // pokupi candy
+        // Item picked
         connection.on("ItemPicked", (index, userId) => {
-            if (!this.items[index]) return;
+            if (!this.items[index] || !this.items[index].visible) return;
             this.items[index].visible = false;
+
             const id = String(userId);
             if (this.scores[id] !== undefined) {
                 this.scores[id]++;
                 this.updateScoreUI();
             }
         });
+
+        // Match finished (proglasavanje pobednika)
+    connection.on("MatchFinished", (winnerId) => {
+    const isWinner = String(winnerId) === this.myId;
+    const winnerName = isWinner ? "YOU" : (this.player1.userId == winnerId ? this.player1.username : this.player2.username);
+    const loserName = !isWinner ? "YOU" : (this.player1.userId != winnerId ? this.player1.username : this.player2.username);
+
+    // Kreiraj overlay
+    const overlay = new PIXI.Graphics();
+    overlay.beginFill(0x000000, 0.7);
+    overlay.drawRect(0, 0, this.app.screen.width, this.app.screen.height);
+    overlay.endFill();
+    this.container.addChild(overlay);
+
+    // Kreiraj karticu
+    const cardWidth = 400;
+    const cardHeight = 200;
+    const card = new PIXI.Graphics();
+    card.beginFill(0x1e293b);
+    card.lineStyle(4, 0x38bdf8);
+    card.drawRoundedRect(-cardWidth/2, -cardHeight/2, cardWidth, cardHeight, 16);
+    card.endFill();
+    card.x = this.app.screen.width / 2;
+    card.y = this.app.screen.height / 2;
+    this.container.addChild(card);
+
+    // Tekst
+    const message = new PIXI.Text(
+        `WINNER: ${winnerName.toUpperCase()}\nLOSER: ${loserName.toUpperCase()}`,
+        {
+            fontFamily: "Rajdhani",
+            fontSize: 24,
+            fontWeight: "bold",
+            fill: isWinner ? "#22c55e" : "#ef4444",
+            align: "center",
+        }
+    );
+    message.anchor.set(0.5);
+    message.x = card.x;
+    message.y = card.y;
+    this.container.addChild(message);
+
+    // Klik za povratak u lobby
+    overlay.interactive = true;
+    overlay.buttonMode = true;
+    overlay.once("pointerdown", () => {
+        this.returnToLobby();
+    });
+});
     }
 
     returnToLobby() {
@@ -238,6 +298,7 @@ export class GameScene {
         this.app.ticker.remove(this.animateItems, this);
         connection.off("PlayerMoved");
         connection.off("ItemPicked");
+        connection.off("MatchFinished");
         this.container.destroy({ children: true });
     }
 }

@@ -113,6 +113,37 @@ namespace CandyGrabberApi.SignalR
             await Clients.Group(recipientUsername)
                 .SendAsync("GameStarted", gameStartDto);
         }
+        public async Task EndGameWithScore(int gameId, int p1Score, int p2Score, int p1Id, int p2Id)
+        {
+            int winnerId;
+            int loserId;
+
+            if (p1Score > p2Score)
+            {
+                winnerId = p1Id;
+                loserId = p2Id;
+            }
+            else
+            {
+                winnerId = p2Id;
+                loserId = p1Id;
+            }
+
+            var winner = (await _unitOfWork.User.FindAsync(u => u.Id == winnerId)).FirstOrDefault();
+            var loser = (await _unitOfWork.User.FindAsync(u => u.Id == loserId)).FirstOrDefault();
+
+            winner?.RegisterWin();
+            loser?.RegisterLoss();
+
+            await _db.SaveChangesAsync();
+
+            await Clients.Group($"game_{gameId}")
+                .SendAsync("MatchFinished", winnerId);
+        }
+        public async Task JoinGame(int gameId)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"game_{gameId}");
+        }
 
         public async Task PlayerMove(int gameId, int playerId, float x, float y)
         {
