@@ -1,6 +1,7 @@
 ﻿using CandyGrabberApi.Domain;
 using CandyGrabberApi.DTOs;
 using CandyGrabberApi.Services;
+using CandyGrabberApi.Services.Generators;
 using CandyGrabberApi.Services.IServices;
 using CandyGrabberApi.UnitOfWork;
 using Microsoft.AspNetCore.SignalR;
@@ -77,37 +78,69 @@ namespace CandyGrabberApi.SignalR
             if (senderUser == null || recipientUser == null) return;
 
             Game game = await _gameService.CreateGame(120);
+
             Player hostPlayer = await _playerService.CreatePlayer(senderUser.Id, game.Id);
             Player guestPlayer = await _playerService.CreatePlayer(recipientUser.Id, game.Id);
+
+            var maze = MazeGenerator.Generate(12, 12);
+            var candies = CandyGenerator.Generate(maze, 11);
 
             var gameStartDto = new GameStartDTO
             {
                 GameId = game.Id,
-                Player1 = new PlayerDTO { UserId = hostPlayer.UserId, Username = hostPlayer.User.Username, GameId = hostPlayer.GameId },
-                Player2 = new PlayerDTO { UserId = guestPlayer.UserId, Username = guestPlayer.User.Username, GameId = guestPlayer.GameId }
+
+                Player1 = new PlayerDTO
+                {
+                    UserId = hostPlayer.UserId,
+                    Username = hostPlayer.User.Username,
+                    GameId = hostPlayer.GameId
+                },
+
+                Player2 = new PlayerDTO
+                {
+                    UserId = guestPlayer.UserId,
+                    Username = guestPlayer.User.Username,
+                    GameId = guestPlayer.GameId
+                },
+
+                MazeLayout = maze,
+                Candies = candies
             };
 
-            await Clients.Group(senderUsername).SendAsync("GameStarted", gameStartDto);
-            await Clients.Group(recipientUsername).SendAsync("GameStarted", gameStartDto);
+            await Clients.Group(senderUsername)
+                .SendAsync("GameStarted", gameStartDto);
+
+            await Clients.Group(recipientUsername)
+                .SendAsync("GameStarted", gameStartDto);
         }
 
         public async Task PlayerMove(int gameId, int playerId, float x, float y)
         {
-            await Clients.Group($"game_{gameId}").SendAsync("PlayerMoved", playerId, x, y);
+            // šalji svima osim pošiljaocu
+            await Clients.GroupExcept($"game_{gameId}", Context.ConnectionId)
+                .SendAsync("PlayerMoved", playerId, x, y);
         }
 
-        public async Task PickItem(int gameId, int itemIndex)
+        public async Task PickItem(int gameId, int itemIndex, int userId)
         {
-            await Clients.Group($"game_{gameId}").SendAsync("ItemPicked", itemIndex);
+            await Clients.Group($"game_{gameId}").SendAsync("ItemPicked", itemIndex, userId);
         }
 
         public override async Task OnConnectedAsync()
         {
             var username = Context.GetHttpContext()?.Request.Query["username"].ToString();
+            var gameIdStr = Context.GetHttpContext()?.Request.Query["gameId"].ToString();
+
             if (!string.IsNullOrEmpty(username))
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, username);
             }
+
+            if (!string.IsNullOrEmpty(gameIdStr) && int.TryParse(gameIdStr, out int gameId))
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, $"game_{gameId}");
+            }
+
             await base.OnConnectedAsync();
         }
 
