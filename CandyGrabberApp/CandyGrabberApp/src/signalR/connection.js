@@ -3,14 +3,17 @@ import { config } from "../config.js";
 export let connection = null;
 
 export function createConnection(username) {
+
+    const gameId = localStorage.getItem("activeGameId") || "";
+
     connection = new signalR.HubConnectionBuilder()
-        .withUrl(`${config.hubUrl}?username=${username}`, {
+        .withUrl(`${config.hubUrl}?username=${username}&gameId=${gameId}`, {
             withCredentials: true,
             transport: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.LongPolling
         })
         .withAutomaticReconnect([0, 2000, 10000])
         .build();
-    
+
     return connection;
 }
 

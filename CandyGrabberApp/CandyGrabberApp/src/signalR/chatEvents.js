@@ -1,57 +1,52 @@
 import { connection } from "./connection.js";
-
-// Registracija svih SignalR događaja
 export function registerSignalREvents() {
     if (!connection) {
         console.warn("SignalR: Connection not initialized yet. Events will be attached later.");
         return;
     }
-
-    // CHAT poruke
     connection.on("ReceiveMessage", (senderUsername, content) => {
         console.log(`Message from ${senderUsername}: ${content}`);
-        // TODO: prikaz poruke u UI
     });
 
-    // Friend request
-    connection.on("FriendRequestSent", (senderUsername) => {
-        console.log(`Friend request from: ${senderUsername}`);
-        // TODO: dodaj badge, popup ili alert
-    });
-
-    // Game request
+    connection.on("FriendRequestSent", (request) => {
+        console.log("Novi Friend Request:", request);
+    this.addFriendRequestToUI(request);
+});
     connection.on("ReceiveGameRequest", ({ senderId, username }) => {
         console.log(`Game request from: ${username}`);
-        // TODO: UI prikaz zahteva (prihvati/odbij)
-    });
 
-    // Game start event
+    });
     connection.on("GameStarted", (gameStartDto) => {
         console.log("Game started!", gameStartDto);
-
-        // TODO: ovde pokrenuti Pixi.js logiku za igru
-        // Primer:
-        // startGame(gameStartDto);
     });
-
-    // Player move (za igru u real-time)
     connection.on("PlayerMoved", (playerId, x, y) => {
-        console.log(`Player ${playerId} moved to (${x}, ${y})`);
-        // TODO: update lokacije igrača na mapi
+        console.log(`Player ${playerId} se pomerio na: (${x}, ${y})`);
     });
 
-    // Item pick (za igru u real-time)
     connection.on("ItemPicked", (itemIndex) => {
         console.log(`Item ${itemIndex} picked`);
-        // TODO: ukloni item iz UI
     });
     connection.on("MatchFinished", (winnerId) => {
 
     if (String(winnerId) === this.myId)
-        alert("YOU WIN 🏆");
+        alert("pobedio si");
     else
-        alert("YOU LOSE 💀");
+        alert("izgubio si");
 
     this.returnToLobby();
-});
+    });
+    connection.on("GameResumed", (gameState) => {
+    for (const id in gameState.PlayerX) {
+        if (this.players[id]) {
+            this.players[id].x = gameState.PlayerX[id];
+            this.players[id].y = gameState.PlayerY[id];
+        }
+    }
+    this.scores = { ...gameState.Scores };
+
+    gameState.CandiesCollected.forEach((collected, index) => {
+        if (this.items[index]) this.items[index].visible = !collected;
+    });
+    this.updateScoreUI();
+    });
 }

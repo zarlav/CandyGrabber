@@ -18,7 +18,6 @@ export async function createApp() {
         backgroundColor: 0x0f172a
     });
 
-    // PixiJS v8 koristi .canvas umesto .view
     app.canvas.style.position = "absolute";
     app.canvas.style.top = "0";
     app.canvas.style.left = "0";
@@ -36,7 +35,6 @@ function showLogin() {
 
     loginPage = new LoginPage(
         app,
-        // LOGIN SUCCESS
         async (userData) => {
             if (userData && userData.username) {
                 await startConnection(userData.username);
@@ -47,7 +45,6 @@ function showLogin() {
                 app.stage.addChild(lobby.container);
             }
         },
-        // REGISTER CLICK
         () => {
             showRegister();
         }
@@ -62,7 +59,6 @@ function showRegister() {
 
     registerPage = new RegisterPage(
         app,
-        // BACK TO LOGIN
         () => {
             showLogin();
         }

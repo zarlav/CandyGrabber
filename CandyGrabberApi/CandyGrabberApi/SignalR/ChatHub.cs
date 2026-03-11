@@ -1,5 +1,6 @@
 ﻿using CandyGrabberApi.Domain;
 using CandyGrabberApi.DTOs;
+using CandyGrabberApi.DTOs.UserDTO;
 using CandyGrabberApi.Services;
 using CandyGrabberApi.Services.Generators;
 using CandyGrabberApi.Services.IServices;
@@ -18,6 +19,8 @@ namespace CandyGrabberApi.SignalR
         private readonly IPlayerService _playerService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly CandyGrabberContext _db;
+
+        private static Dictionary<int, GameStateDTO> ActiveGames = new();
 
         public ChatHub(
             IUserService userService,
@@ -55,6 +58,8 @@ namespace CandyGrabberApi.SignalR
 
             await _db.SaveChangesAsync();
             await Clients.Group($"game_{gameId}").SendAsync("MatchFinished", winnerUserId);
+
+            ActiveGames.Remove(gameId);
         }
 
         public async Task SendMessageToUser(string recipientUsername, string senderUsername, string content)
@@ -74,7 +79,6 @@ namespace CandyGrabberApi.SignalR
         {
             var senderUser = await _userService.GetUserByUsername(senderUsername);
             var recipientUser = await _userService.GetUserByUsername(recipientUsername);
-
             if (senderUser == null || recipientUser == null) return;
 
             Game game = await _gameService.CreateGame(120);
@@ -84,34 +88,59 @@ namespace CandyGrabberApi.SignalR
 
             var maze = MazeGenerator.Generate(12, 12);
             var candies = CandyGenerator.Generate(maze, 11);
+            var candyDtos = candies.Select(c => new CandyDTO
+            {
+                X = c.X,
+                Y = c.Y,
+                Collected = false
+            }).ToList();
+
+            var gameState = new GameStateDTO
+            {
+                GameId = game.Id,
+                TotalCandies = candyDtos.Count,
+                CandiesCollected = candyDtos.Select(c => c.Collected).ToList(),
+                PlayerX = new Dictionary<int, float>
+                {
+                    [hostPlayer.UserId] = 0,
+                    [guestPlayer.UserId] = (maze[0].Length - 1) * 50
+                },
+                PlayerY = new Dictionary<int, float>
+                {
+                    [hostPlayer.UserId] = 0,
+                    [guestPlayer.UserId] = (maze.Length - 1) * 50
+                },
+                Scores = new Dictionary<int, int>
+                {
+                    [hostPlayer.UserId] = 0,
+                    [guestPlayer.UserId] = 0
+                },
+                MazeLayout = maze,
+                Candies = candyDtos
+            };
+            ActiveGames[game.Id] = gameState;
 
             var gameStartDto = new GameStartDTO
             {
                 GameId = game.Id,
-
                 Player1 = new PlayerDTO
                 {
                     UserId = hostPlayer.UserId,
                     Username = hostPlayer.User.Username,
                     GameId = hostPlayer.GameId
                 },
-
                 Player2 = new PlayerDTO
                 {
                     UserId = guestPlayer.UserId,
                     Username = guestPlayer.User.Username,
                     GameId = guestPlayer.GameId
                 },
-
                 MazeLayout = maze,
-                Candies = candies
+                Candies = candyDtos
             };
 
-            await Clients.Group(senderUsername)
-                .SendAsync("GameStarted", gameStartDto);
-
-            await Clients.Group(recipientUsername)
-                .SendAsync("GameStarted", gameStartDto);
+            await Clients.Group(senderUsername).SendAsync("GameStarted", gameStartDto);
+            await Clients.Group(recipientUsername).SendAsync("GameStarted", gameStartDto);
         }
         public async Task EndGameWithScore(int gameId, int p1Score, int p2Score, int p1Id, int p2Id)
         {
@@ -139,37 +168,78 @@ namespace CandyGrabberApi.SignalR
 
             await Clients.Group($"game_{gameId}")
                 .SendAsync("MatchFinished", winnerId);
+            ActiveGames.Remove(gameId);
         }
         public async Task JoinGame(int gameId)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, $"game_{gameId}");
+            if (ActiveGames.TryGetValue(gameId, out var state))
+            {
+                await Clients.Caller.SendAsync("GameResumed", state);
+            }
         }
 
         public async Task PlayerMove(int gameId, int playerId, float x, float y)
         {
-            // šalji svima osim pošiljaocu
+            if (ActiveGames.ContainsKey(gameId))
+            {
+                var state = ActiveGames[gameId];
+                state.PlayerX[playerId] = x;
+                state.PlayerY[playerId] = y;
+            }
+
             await Clients.GroupExcept($"game_{gameId}", Context.ConnectionId)
                 .SendAsync("PlayerMoved", playerId, x, y);
         }
 
-        public async Task PickItem(int gameId, int itemIndex, int userId)
+        public async Task PickItem(int gameId, int index, int userId)
         {
-            await Clients.Group($"game_{gameId}").SendAsync("ItemPicked", itemIndex, userId);
-        }
+            if (!ActiveGames.TryGetValue(gameId, out var game)) return;
 
+            if (index < 0 || index >= game.CandiesCollected.Count) return;
+
+            if (!game.CandiesCollected[index])
+            {
+                game.CandiesCollected[index] = true;
+
+                if (game.Scores.ContainsKey(userId))
+                    game.Scores[userId]++;
+                else
+                    game.Scores[userId] = 1;
+
+                await Clients.Group($"game_{gameId}")
+                    .SendAsync("ItemPicked", index, userId);
+
+                if (game.CandiesCollected.All(c => c))
+                {
+                    var winnerId = game.Scores
+                        .OrderByDescending(s => s.Value)
+                        .First().Key;
+
+                    var loserId = game.Scores
+                        .OrderByDescending(s => s.Value)
+                        .Last().Key;
+
+                    await EndGame(gameId, winnerId, loserId);
+                }
+            }
+        }
         public override async Task OnConnectedAsync()
         {
             var username = Context.GetHttpContext()?.Request.Query["username"].ToString();
             var gameIdStr = Context.GetHttpContext()?.Request.Query["gameId"].ToString();
 
             if (!string.IsNullOrEmpty(username))
-            {
                 await Groups.AddToGroupAsync(Context.ConnectionId, username);
-            }
 
             if (!string.IsNullOrEmpty(gameIdStr) && int.TryParse(gameIdStr, out int gameId))
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, $"game_{gameId}");
+
+                if (ActiveGames.TryGetValue(gameId, out GameStateDTO state))
+                {
+                    await Clients.Caller.SendAsync("GameResumed", state);
+                }
             }
 
             await base.OnConnectedAsync();
@@ -194,11 +264,20 @@ namespace CandyGrabberApi.SignalR
             var recipient = await _userService.GetUserByUsername(recipientUsername);
 
             if (sender == null || recipient == null) return;
-
-            var request = new FriendRequestDTO { SenderId = sender.Id, RecipientId = recipient.Id, Timestamp = DateTime.UtcNow };
+            var request = new FriendRequestDTO
+            {
+                SenderId = sender.Id,
+                RecipientId = recipient.Id,
+                RequestStatus = Domain.Enums.FriendRequestStatus.SENT,
+                Timestamp = DateTime.UtcNow
+            };
             await _requestService.SendFriendRequest(request);
 
-            await Clients.Group(recipientUsername).SendAsync("FriendRequestSent", senderUsername);
+            await Clients.Group(recipientUsername).SendAsync("FriendRequestSent", new
+            {
+                Id = request.Id,
+                SenderUsername = senderUsername
+            });
         }
     }
 }

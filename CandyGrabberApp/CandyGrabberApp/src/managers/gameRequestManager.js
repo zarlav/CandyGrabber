@@ -5,14 +5,12 @@ export class GameRequestManager {
 
     async send(requestData) {
         try {
-            // Clock-skew fix: šaljemo 2 min u budućnost
             const futureTime = new Date(Date.now() + 120000);
             
             const response = await fetch(`${this.baseUrl}GameRequest/SendGameRequest`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    // Šaljemo ID originalno, bez parseInt koji može da pokvari format
                     senderId: requestData.senderId, 
                     recipientId: requestData.recipientId,
                     timestamp: futureTime.toISOString()
@@ -27,7 +25,6 @@ export class GameRequestManager {
 
     async getByRecipient(userId) {
         try {
-            // CACHE BUSTER: Ključno za localhost razvoj da browser ne kešira []
             const url = `${this.baseUrl}GameRequest/GetAllGameRequestByRecipientId/${userId}?t=${Date.now()}`;
             
             const response = await fetch(url, {

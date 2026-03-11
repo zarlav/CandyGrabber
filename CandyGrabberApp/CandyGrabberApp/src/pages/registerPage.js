@@ -18,8 +18,6 @@ export class RegisterPage {
     createUI() {
         const sw = this.app.screen.width;
         const sh = this.app.screen.height;
-
-        // --- 1. POZADINA ---
         const bg = new PIXI.Graphics()
             .rect(0, 0, sw, sh)
             .fill(0x020617);
@@ -36,7 +34,6 @@ export class RegisterPage {
         this.panel.y = sh / 2;
         this.container.addChild(this.panel);
 
-        // --- 2. KARTA ---
         const card = new PIXI.Graphics()
             .roundRect(-210, -260, 420, 520, 28)
             .stroke({ width: 4, color: 0x38bdf8, alpha: 0.2 })
@@ -45,7 +42,6 @@ export class RegisterPage {
             .stroke({ width: 2, color: 0x38bdf8, alpha: 1 });
         this.panel.addChild(card);
 
-        // --- 3. NASLOV ---
         const title = new PIXI.Text({
             text: "REGISTRACIJA",
             style: {
@@ -61,7 +57,6 @@ export class RegisterPage {
         title.y = -190;
         this.panel.addChild(title);
 
-        // --- 4. INPUTI ---
         const inputStyle = `
             position: fixed;
             width: 280px;
@@ -89,9 +84,8 @@ export class RegisterPage {
 
         this.positionInputs();
 
-        // --- 5. REGISTER DUGME ---
         this.registerBtn = new PIXI.Graphics();
-        this.registerBtn.y = 150; // Spušteno da ne preklapa inpute
+        this.registerBtn.y = 150;
         this.registerBtn.eventMode = 'static';
         this.registerBtn.cursor = 'pointer';
         this.updateButton(false);
@@ -108,7 +102,7 @@ export class RegisterPage {
         });
         btnText.anchor.set(0.5);
         btnText.x = 0;
-        btnText.y = 24; // Centrirano u odnosu na visinu g-rect-a (48px)
+        btnText.y = 24; 
 
         this.registerBtn.addChild(btnText);
         this.registerBtn.on("pointerover", () => this.updateButton(true));
@@ -116,7 +110,6 @@ export class RegisterPage {
         this.registerBtn.on("pointerdown", () => this.handleRegister());
         this.panel.addChild(this.registerBtn);
 
-        // --- 6. NAZAD NA PRIJAVU ---
         this.backBtn = new PIXI.Text({
             text: "Nazad na prijavu",
             style: {
